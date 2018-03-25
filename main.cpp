@@ -1,45 +1,9 @@
-#include<cstdio>
-#include<cstdlib>
-#include<iostream>
-#include<cstring>
-#include<algorithm>
-#include<sstream>
-#include<fstream>
-#include<string>
-#include<vector>
+#include "perceptron.h"
+#include "headers.h"
+#include <iostream>
+
 using namespace std;
 
-
-struct HyperPlane
-{
-    double *w;
-    double b;
-    HyperPlane(int d)
-    {
-        this->w = new double[d];
-        memset(this->w, 0, sizeof(this->w));
-        this->b = 0;
-    }
-};
-
-struct Point
-{
-    double *x;
-    int y;
-    Point(int d)
-    {
-        this->x = new double[d];
-    }
-    Point(int d, double *x, int y)
-    {
-        this->x = new double[d];
-        memcpy(this->x, x, sizeof(x));
-        this->y = y;
-    }
-};
-
-typedef vector<Point> PointSet;
-PointSet train_points;
 
 PointSet LoadData(char* filename, char* label_filename, int dimension)
 {
@@ -76,54 +40,19 @@ PointSet LoadData(char* filename, char* label_filename, int dimension)
 }
 
 
-double dot(double* w, double *x, int dimension)
-{
-    double sum = 0;
-    for (int i = 0; i < dimension; i++) {
-        sum += (*w) * (*x);
-        w++;
-        x++;
-    }
-    return sum;
-}
 
-void Perceptron(PointSet trainPoints, int dimension)
-{
-    int n = trainPoints.size();
-    HyperPlane plane = HyperPlane(dimension);
-    int iter_cnt = 0;
-    while(true)
-    {
-        printf("Iteration %d\n", ++iter_cnt);
-        int i;
-        for(i = 0; i < n; i++)
-        {
-            Point cur_pt = trainPoints[i];
-            if(cur_pt.y * (dot(plane.w, cur_pt.x, dimension) + plane.b)   <= 0)
-            {
-                for (int j = 0; j < dimension; j++)
-                {
-                    plane.w[j] += cur_pt.y*cur_pt.x[j];
-                }
-                plane.b += cur_pt.y;
-                printf(" %d  ", i);
-                break;
-            }
-        }
-        if(i == n)
-            break;
-    }
-}
+
 
 
 int main()
 {
-    char train_data[] = "data/titanic_3/titanic_train_data.asc";
-    char train_label[] = "data/titanic_3/titanic_train_label.asc";
-    int dimension = 3;
-    train_points = LoadData(train_data, train_label, dimension);
+    char train_data[] = "data/separable_test_2/titanic_train_data.asc";
+    char train_label[] = "data/separable_test_2/titanic_train_label.asc";
+    int dimension = 2;
+    PointSet train_points = LoadData(train_data, train_label, dimension);
+    //SimplePerceptron(train_points, dimension);
 
-    Perceptron(train_points, dimension);
+    IncreMarginPerceptrion(train_points, dimension, 0.3);
 
 
 
