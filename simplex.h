@@ -40,13 +40,15 @@ struct Simplex_Node{
             this->N[j] = j+m;
         }
         this->v = 0;
+        this->m = m;
+        this->n = n;
     }
 };
 
 struct LPresult{
     double *x;
     int flag;
-    int value;
+    double value;
     LPresult(int d)
     {
         this->x = new double[d];
@@ -59,5 +61,7 @@ struct LPresult{
 LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int n);
 void Pivot(Simplex_Node &node, int leaving, int entering);
 bool Initial_Simplex(Simplex_Node &node);
-
+void PrintLPresult(LPresult result, int dimension);
+void PrintSimplexNode(Simplex_Node node);
+void LPclassification(PointSet trainPoints, int dimension, int direction);
 #endif // __SIMPLEX_H__

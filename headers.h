@@ -13,6 +13,7 @@
 using namespace std;
 
 #define MAX_DOUBLE 1e9
+#define ZERO  1e-6
 
 struct HyperPlane
 {

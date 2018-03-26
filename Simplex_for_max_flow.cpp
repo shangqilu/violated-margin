@@ -1,21 +1,92 @@
-#include "simplex.h"
-#include "headers.h"
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <cmath>
+#include <map>
+using namespace std;
 
-LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int n)
+#define MAX_DOUBLE 1e9
+#define ZERO  1e-6
+
+struct Simplex_Node{
+    int **A;
+    int *b;
+    int *C;
+
+    int *N; //non-basic variables
+    int *B; //basic variables
+
+    int m;// number of constraints
+    int n;// number of features
+    int v; //objective function value
+
+    Simplex_Node(int **input_A, int *input_b, int *input_C, int m, int n)
+    {
+        this->A = new int*[m];
+        for (int i = 0; i < m; i++) {
+            this->A[i] = new int[n+1];
+        }
+        this->b = new int[m];
+        this->C = new int[n+1];
+        this->N = new int[n+1];
+        this->B = new int[m];
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                this->A[i][j] = input_A[i][j];
+            }
+            this->b[i] = input_b[i];
+            this->B[i] = i;
+        }
+        for (int j = 0; j < n; j++) {
+            this->C[j] = input_C[j];
+            this->N[j] = j+m;
+        }
+        this->v = 0;
+        this->m = m;
+        this->n = n;
+    }
+};
+
+struct LPresult{
+    int *x;
+    int flag;
+    int value;
+    LPresult(int d)
+    {
+        this->x = new int[d];
+        this->flag = 0;
+        this->value = 0;
+    }
+};
+
+
+LPresult Simplex(int **input_A, int *input_b, int *input_C, int m, int n);
+void Pivot(Simplex_Node &node, int leaving, int entering);
+bool Initial_Simplex(Simplex_Node &node);
+void PrintLPresult(LPresult result, int dimension);
+void PrintSimplexNode(Simplex_Node node);
+
+
+LPresult Simplex(int **input_A, int *input_b, int *input_C, int m, int n)
 {
-    puts("RunSimplex...");
+    //puts("RunSimplex...");
     Simplex_Node node = Simplex_Node(input_A, input_b, input_C, m, n);
     LPresult result = LPresult(n);
     bool re = Initial_Simplex(node);
     if (!re) {
-        puts("It is infeasible!");
+        //puts("It is infeasible!");
         return result;
     }
 
     while(1){
         //choose the variable with the smallest index
-        puts("pivoting...");
-        PrintSimplexNode(node);
+        //puts("pivoting...");
+        //PrintSimplexNode(node);
         int min_index = n + m; //non basic variable starting form m
         int entering = n + m;
         for (int j = 0; j < n; j++) {
@@ -28,22 +99,22 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
                 }
             }
         }
-        printf("choosing entering: %d %d\n", entering, min_index);
+        //printf("choosing entering: %d %d\n", entering, min_index);
         if(entering == n + m) {
             //end computing with an optimal solution
-            puts("find the optimal value");
+            //puts("find the optimal value");
             result.flag = 1;
             break;
         }
-        double max_delta = MAX_DOUBLE;
+        int max_delta = MAX_DOUBLE;
         min_index = m + n;
         int leaving = m + n;
         for (int i = 0; i < m; i++) {
             if (node.A[i][entering] > 0) {
-                double tmp = node.b[i]/node.A[i][entering];
-                //printf("*** %d %lf\n", i, tmp);
+                int tmp = node.b[i]/node.A[i][entering];
+                //printf("*** %d %d\n", i, tmp);
                 if (max_delta > tmp) {
-                    //printf("update leaving %d %lf %lf", i, tmp);
+                    //printf("update leaving %d %d %d", i, tmp);
                     leaving = i;
                     max_delta = tmp;
                     min_index = node.B[i];
@@ -57,10 +128,10 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
                 }
             }
         }
-        printf("choosing leaving: %d %d\n", leaving, min_index);
+        //printf("choosing leaving: %d %d\n", leaving, min_index);
         if(leaving == m + n) {
             //unbounded
-            puts("It is unbounded!");
+            //puts("It is unbounded!");
             return result;
         } else{
             Pivot(node, leaving, entering);
@@ -81,7 +152,7 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
 void Pivot(Simplex_Node &node, int leaving, int entering)
 {
     //compute new coefficients for the new equation for new basic variable x_e
-    double tmp = node.A[leaving][entering];
+    int tmp = node.A[leaving][entering];
     node.b[leaving] /= tmp;
     for (int j = 0; j < node.n; j++)
     {
@@ -119,9 +190,9 @@ void Pivot(Simplex_Node &node, int leaving, int entering)
 
 bool Initial_Simplex(Simplex_Node &node)
 {
-    puts("Run Initial_Simplex...");
+    //puts("Run Initial_Simplex...");
     int k = -1;
-    double min_value = MAX_DOUBLE;
+    int min_value = MAX_DOUBLE;
 
     //printf("m: %d n: %d\n", node.m, node.n);
     for (int i = 0;i < node.m; i++) {
@@ -133,20 +204,20 @@ bool Initial_Simplex(Simplex_Node &node)
     }
     //The initial basic solution is feasible
     if (min_value >= 0) {
-        puts("initial basic solution ok ");
+        //puts("initial basic solution ok ");
         return true;
     }
     //add a new non basic variable x_n
     node.n++;
     int m = node.m;
     int n = node.n;
-    puts("constructing LP_aux ...");
+    //puts("constructing LP_aux ...");
     for (int i = 0; i < m; i++) {
         node.A[i][n-1] = -1;
     }
     node.N[n-1] = n-1+m;
 
-    double *back_c = new double[n-1];
+    int *back_c = new int[n-1];
     //change the objective function into -x_n
     for (int j = 0; j < n-1; j++) {
         back_c[j] = node.C[j];
@@ -178,19 +249,19 @@ bool Initial_Simplex(Simplex_Node &node)
         //printf("choosing entering: %d %d\n", entering, min_index);
         if(entering == n + m) {
             //end computing with an optimal solution
-            puts("find the optimal value in Initial-simplex");
+            //puts("find the optimal value");
             flag = 1;
             break;
         }
-        double max_delta = MAX_DOUBLE;
+        int max_delta = MAX_DOUBLE;
         min_index = m + n;
         int leaving = m + n;
         for (int i = 0; i < m; i++) {
             if (node.A[i][entering] > 0) {
-                double tmp = node.b[i]/node.A[i][entering];
-                //printf("*** %d %lf\n", i, tmp);
+                int tmp = node.b[i]/node.A[i][entering];
+                //printf("*** %d %d\n", i, tmp);
                 if (max_delta > tmp) {
-                    //printf("update leaving %d %lf %lf", i, tmp);
+                    //printf("update leaving %d %d %d", i, tmp);
                     leaving = i;
                     max_delta = tmp;
                     min_index = node.B[i];
@@ -207,7 +278,7 @@ bool Initial_Simplex(Simplex_Node &node)
         //printf("choosing leaving: %d %d\n", leaving, min_index);
         if(leaving == m + n) {
             //unbounded
-            puts("It is unbounded!");
+            //puts("It is unbounded!");
             break;
         } else{
             Pivot(node, leaving, entering);
@@ -215,7 +286,7 @@ bool Initial_Simplex(Simplex_Node &node)
 
     }
     if (!flag || fabs(node.v - 0) > ZERO) {
-        puts("infeasible!");
+        //puts("infeasible!");
         return false;
     }
     //if x_n is a basic variable, we should do a pivot
@@ -275,11 +346,11 @@ bool Initial_Simplex(Simplex_Node &node)
 
 void PrintLPresult(LPresult result, int dimension)
 {
-    printf("objective value: %lf\n", result.value);
+    printf("objective value: %d\n", result.value);
     printf("X: ");
     for (int i = 0; i < dimension; i++)
     {
-        printf("%lf ", result.x[i]);
+        printf("%d ", result.x[i]);
     }
     cout << endl;
 }
@@ -291,18 +362,18 @@ void PrintSimplexNode(Simplex_Node node)
     puts("Matrix A:");
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
-            cout << node.A[i][j] << " ";
+            printf("%d ", node.A[i][j]);
         }
         cout << endl;
     }
     puts("b: ");
     for (int i = 0; i < m; i++) {
-        cout << node.b[i] << " ";
+        printf("%d ", node.b[i]);
     }
     cout << endl;
     puts("objective function C:");
     for (int j = 0; j < n; j++) {
-        cout << node.C[j] << " ";
+        printf("%d ", node.C[j]);
     }
     cout << endl;
     puts("Basic variables:");
@@ -315,78 +386,92 @@ void PrintSimplexNode(Simplex_Node node)
         printf("%d ", node.N[j]);
     }
     cout << endl;
-    printf("Cur objecrive value %lf\n", node.v);
+    printf("Cur objecrive value %d\n", node.v);
 }
 
+const int mmax = 202;
+int Map[mmax][mmax];
+int A[mmax*3][mmax*2];
+int input_B[mmax*3];
+int input_C[2*mmax];
+int *input_A[mmax*3];
 
-void LPclassification(PointSet trainPoints, int dimension, int direction)
+map<int, int> index_map;
+int main()
 {
-    int number_constraints, number_variables;
-    number_variables = 2*(dimension+1)+1;
-    if (direction == 0)   //simple LP, no specific direction
-    {
-        number_constraints = trainPoints.size();
-    }
-    else
-    {
-        number_constraints = trainPoints.size() + 2*dimension;
-    }
-    double **input_A, *input_b, *input_C;
-    input_A = new double*[number_constraints];
-    for (int i = 0; i < number_constraints; i++)
-    {
-        input_A[i] = new double[number_variables];
-    }
-    input_b = new double[number_constraints];
-    input_C = new double[number_variables];
-    int n = trainPoints.size();
+    freopen("data/LPtest/input.txt", "r", stdin);
+    int m, n;
+    while(cin >> n >> m) {
+        if (n == 0) {
+            puts("0");
+            continue;
+        }
+        index_map.clear();
+        memset(Map, 0, sizeof(Map));
+
+        for (int i = 0; i < mmax*3; i++) {
+            input_A[i] = A[i];
+        }
 
 
-    for (int i = 0; i < n; i++)
-    {
-        int cur_label = trainPoints[i].y;//label: 1 or -1
-        for (int j = 0; j < dimension; j++)
+        for (int i = 0; i < mmax*3; i++) {
+            for (int j = 0;j < 2*mmax; j++)
+                input_A[i][j] = 0;
+        }
+
+
+        for (int i = 0; i < mmax*3; i++) {
+            input_B[i] = 0;
+        }
+        for (int j = 0; j < 2*mmax; j++) {
+            input_C[j] = 0;
+        }
+        int u, v, cost;
+        for (int i = 0; i < n; i++) {
+            cin >> u >> v >> cost;
+            Map[u-1][v-1] += cost;
+        }
+
+        int column = 0;
+        int cnt = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < m; j++) {
+                if (Map[i][j] > 0) {
+                    int index = i*m+j;
+                    if (!index_map.count(index)) {
+                        index_map[index] = column++;
+                    }
+                    input_A[cnt][index_map[index]] = 1;
+                    input_B[cnt++] = Map[i][j];
+                }
+            }
+        }
+
+        for (int i = 1; i < m-1; i++) {
+            for (int j = 0; j < m; j++) {
+                if (j!=i) {
+                    if(Map[i][j] > 0) {
+                        if (!index_map.count((i*m+j)))index_map[i*m+j] = column++;
+                        input_A[cnt][index_map[i*m+j]] = 1;
+                        input_A[cnt+1][index_map[i*m+j]] = -1;
+                    }
+                    if (Map[j][i] > 0) {
+                        if (!index_map.count((j*m+i)))index_map[j*m+i] = column++;
+                        input_A[cnt][index_map[j*m+i]] = -1;
+                        input_A[cnt+1][index_map[j*m+i]] = 1;
+                    }
+                }
+            }
+            input_B[cnt] = input_B[cnt+1] = 0;
+            cnt += 2;
+        }
+        for (int i = 0;i < m; i++)
         {
-            input_A[i][2*j] = - trainPoints[i].x[j] * cur_label;
-            input_A[i][2*j+1] = trainPoints[i].x[j] * cur_label;
+           if (Map[0][i] > 0) input_C[index_map[i]] = 1;
         }
-        input_A[i][2*dimension] = -1 * cur_label;
-        input_A[i][2*dimension+1] = 1 * cur_label;
-        input_A[i][2*dimension+2] = 1 ;//always 1 in last dimension
-        input_b[i] = 0;
+        LPresult result = Simplex(input_A, input_B, input_C, cnt, m*m);
+        printf("%d\n", result.value);
+        //PrintLPresult(result, m*m);
     }
-    int cur_row = n;
-    if(direction > 0)   //add constraints information about w
-    {
-        for (int j = 0; j < dimension; j++) {
-            if (j == direction) {
-                input_A[cur_row][2*j] = 1;// w_j<=1
-                input_A[cur_row][2*j+1] = -1;
-                input_b[cur_row] = 1;
-
-                input_A[cur_row+1][2*j] = -1; //w_j>=1
-                input_A[cur_row+1][2*j+1] = 1;
-                input_b[cur_row+1] = -1;
-            }
-            else {
-                input_A[cur_row][2*j] = 1;// w_j<=1
-                input_A[cur_row][2*j+1] = -1;
-                input_b[cur_row] = 1;
-
-                input_A[cur_row+1][2*j] = -1; //w_j>=-1
-                input_A[cur_row+1][2*j+1] = 1;
-                input_b[cur_row+1] = 1;
-            }
-        }
-        cur_row += 2;
-    }
-    for (int j = 0; j < number_variables - 1; j++)
-    {
-        input_C[j] = 0;
-    }
-    input_C[number_variables-1] = 1;
-
-    LPresult result = Simplex(input_A, input_b, input_C, number_constraints, number_variables);
-    PrintLPresult(result, dimension);
-
+    return 0;
 }
