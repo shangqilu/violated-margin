@@ -319,7 +319,7 @@ void PrintSimplexNode(Simplex_Node node)
 }
 
 
-void LPclassification(PointSet trainPoints, int dimension, int direction)
+HyperPlane LPclassification(PointSet trainPoints, int dimension, int direction)
 {
     int number_constraints, number_variables;
     number_variables = 2*(dimension+1)+1;
@@ -341,7 +341,12 @@ void LPclassification(PointSet trainPoints, int dimension, int direction)
     input_C = new double[number_variables];
     int n = trainPoints.size();
 
-
+    for (int i = 0;i < number_constraints; i++)
+    {
+        for (int j = 0; j < number_variables; j++) {
+            input_A[i][j] = 0;
+        }
+    }
     for (int i = 0; i < n; i++)
     {
         int cur_label = trainPoints[i].y;//label: 1 or -1
@@ -359,7 +364,7 @@ void LPclassification(PointSet trainPoints, int dimension, int direction)
     if(direction > 0)   //add constraints information about w
     {
         for (int j = 0; j < dimension; j++) {
-            if (j == direction) {
+            if (j == direction-1) {
                 input_A[cur_row][2*j] = 1;// w_j<=1
                 input_A[cur_row][2*j+1] = -1;
                 input_b[cur_row] = 1;
@@ -377,16 +382,23 @@ void LPclassification(PointSet trainPoints, int dimension, int direction)
                 input_A[cur_row+1][2*j+1] = 1;
                 input_b[cur_row+1] = 1;
             }
+            cur_row += 2;
         }
-        cur_row += 2;
     }
     for (int j = 0; j < number_variables - 1; j++)
     {
         input_C[j] = 0;
     }
     input_C[number_variables-1] = 1;
-
+    cout << number_constraints << endl;
+    //Simplex_Node node = Simplex_Node(input_A, input_b, input_C, number_constraints, number_variables);
+    //PrintSimplexNode(node);
     LPresult result = Simplex(input_A, input_b, input_C, number_constraints, number_variables);
-    PrintLPresult(result, dimension);
-
+    PrintLPresult(result, number_variables);
+    HyperPlane plane = HyperPlane(dimension);
+    for (int j = 0; j < dimension; j++) {
+        plane.w[j] = result.x[2*j]-result.x[2*j+1];
+    }
+    plane.b = result.x[2*dimension]-result.x[2*dimension+1];
+    return plane;
 }

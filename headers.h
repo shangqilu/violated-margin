@@ -10,6 +10,10 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
+#include <ctime>
+#include <cstdlib>
+
+
 using namespace std;
 
 #define MAX_DOUBLE 1e9
@@ -59,8 +63,17 @@ struct Point
 typedef vector<Point> PointSet;
 
 double Dot(double* w, double *x, int dimension);
+
+double Dot(Point pt1, Point pt2, int dimension);
+
+Point PointMinus(Point pt1, Point pt2, int dimension);
+
 void PrintHyperPlane(HyperPlane plane, int dimension);
+
 double Distance(HyperPlane plane, Point pt, int dimension);
+
 double Distance(Point pt1, Point pt2, int dimension);
+
+bool Gaussian(double** A, double* b, double* x, int n);
 
 #endif  //__HEADERS_H__

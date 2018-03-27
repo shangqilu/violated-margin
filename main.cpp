@@ -49,12 +49,18 @@ PointSet LoadData(char* filename, char* label_filename, int dimension)
 
 int main()
 {
+
+
     char train_data[] = "data/separable_test_2/titanic_train_data.asc";
     char train_label[] = "data/separable_test_2/titanic_train_label.asc";
-    int dimension = 1;
+    int dimension = 2;
     PointSet train_points = LoadData(train_data, train_label, dimension);
 
-    LPclassification(train_points, dimension, 0);
+    //test for Simplex
+    HyperPlane plane = LPclassification(train_points, dimension, 2);
+    PrintHyperPlane(plane, plane.d);
+
+    //test for Margin Perceptron
     //SimplePerceptron(train_points, dimension);
 
     //IncreMarginPerceptrion(train_points, dimension, 0.3);

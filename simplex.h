@@ -63,5 +63,5 @@ void Pivot(Simplex_Node &node, int leaving, int entering);
 bool Initial_Simplex(Simplex_Node &node);
 void PrintLPresult(LPresult result, int dimension);
 void PrintSimplexNode(Simplex_Node node);
-void LPclassification(PointSet trainPoints, int dimension, int direction);
+HyperPlane LPclassification(PointSet trainPoints, int dimension, int direction);
 #endif // __SIMPLEX_H__
