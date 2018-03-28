@@ -36,7 +36,7 @@ void SimplePerceptron(PointSet trainPoints, int dimension)
     else PrintHyperPlane(plane, dimension);
 }
 
-bool MarginPerceptrion(PointSet trainPoints, HyperPlane &plane, int dimension, double y_guess, double R, double epsilon)
+bool MarginPerceptron(PointSet trainPoints, HyperPlane &plane, int dimension, double y_guess, double R, double epsilon)
 {
     int n = trainPoints.size();
     int iter_cnt = 0;
@@ -69,12 +69,11 @@ bool MarginPerceptrion(PointSet trainPoints, HyperPlane &plane, int dimension, d
         return false;
     }
     else {
-        PrintHyperPlane(plane, dimension);
         return true;
     }
 }
 
-HyperPlane IncreMarginPerceptrion(PointSet trainPoints, int dimension, double rho)
+HyperPlane IncreMarginPerceptron(PointSet trainPoints, int dimension, double rho)
 {
 
     //find the max distance between the points and the origin
@@ -88,17 +87,17 @@ HyperPlane IncreMarginPerceptrion(PointSet trainPoints, int dimension, double rh
         if (maxDistantce < curDis) maxDistantce = curDis;
         if (minDistance > curDis) minDistance = curDis;
     }
-
+    cout << "Min: " << minDistance << "  Max: " << maxDistantce << endl;
     double y_guess = maxDistantce;
     while(true) {
         plane.Clear();
-        bool re = MarginPerceptrion(trainPoints, plane, dimension, y_guess, maxDistantce, epsilon);
+        bool re = MarginPerceptron(trainPoints, plane, dimension, y_guess, maxDistantce, epsilon);
         if (re) {
             break;
         } else{
             y_guess = (1-epsilon)*y_guess;
         }
-        if(y_guess <= minDistance) {
+        if(y_guess < ZERO) {////need to consider carefully
             puts("It is non-linear separable!");
             break;
         }

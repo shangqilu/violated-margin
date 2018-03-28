@@ -62,6 +62,11 @@ struct Point
 
 typedef vector<Point> PointSet;
 
+PointSet LoadData(char* filename, char* label_filename, int dimension);
+
+PointSet CopyPoints(PointSet points, int dimension);
+
+
 double Dot(double* w, double *x, int dimension);
 
 double Dot(Point pt1, Point pt2, int dimension);
@@ -74,6 +79,16 @@ double Distance(HyperPlane plane, Point pt, int dimension);
 
 double Distance(Point pt1, Point pt2, int dimension);
 
-bool Gaussian(double** A, double* b, double* x, int n);
+
+bool GaussianEquation(double** A, double* b, double* x, int n);
+bool GaussianInverseMatrix(double** A, double**B, int n);
+
+
+void PrintMatrix(double **T, int dimension);
+void MatrixMultiply(double **A, double **B, double **C, int dimension);
+void TransformingPoints(PointSet &points, double **T, int point_dimension);
+
+int LargestPrimeBelow(int m);
+bool is_prime(int n);
 
 #endif  //__HEADERS_H__
