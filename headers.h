@@ -8,17 +8,16 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <set>
 #include <iostream>
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
 
-
 using namespace std;
 
 #define MAX_DOUBLE 1e9
 #define ZERO  1e-6
-
 struct HyperPlane
 {
     double *w;
@@ -58,6 +57,7 @@ struct Point
             this->x[i] = x[i];
         this->y = y;
     }
+
 };
 
 typedef vector<Point> PointSet;
@@ -88,7 +88,12 @@ void PrintMatrix(double **T, int dimension);
 void MatrixMultiply(double **A, double **B, double **C, int dimension);
 void TransformingPoints(PointSet &points, double **T, int point_dimension);
 
+void PrintPoints(PointSet points, int dimension);
+
+
 int LargestPrimeBelow(int m);
 bool is_prime(int n);
+long long Factorial(int d);
+double LogFactorial(int d);
 
 #endif  //__HEADERS_H__

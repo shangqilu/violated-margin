@@ -207,17 +207,19 @@ bool GaussianEquation(double** A, double* b, double* x, int n)
 bool GaussianInverseMatrix(double** A, double**B, int n)
 {
     double **Matrix = new double*[n];
+    double **Inverse = new double*[n];
     //Copy A and Initial B unit matrix
     for (int i = 0; i < n; i++)
     {
         Matrix[i] = new double[n];
+        Inverse[i] = new double[n];
         for (int j = 0; j < n; j++)
         {
             Matrix[i][j] = A[i][j];
         }
         for (int j = 0; j < n; j++)
         {
-            B[i][j] = (i==j)? 1:0;
+            Inverse[i][j] = (i==j)? 1:0;
         }
     }
     for (int i = 0; i < n; i++)
@@ -241,8 +243,10 @@ bool GaussianInverseMatrix(double** A, double**B, int n)
             for (int i = 0; i < n; i++)
             {
                 delete Matrix[i];
+                delete Inverse[i];
             }
             delete Matrix;
+            delete Inverse;
             return false;
         }
         if (maxLineIndex != i)
@@ -254,9 +258,9 @@ bool GaussianInverseMatrix(double** A, double**B, int n)
                 Matrix[i][j] = Matrix[maxLineIndex][j];
                 Matrix[maxLineIndex][j] = temp;
 
-                temp = B[i][j];
-                B[i][j] = B[maxLineIndex][j];
-                B[maxLineIndex][j] = temp;
+                temp = Inverse[i][j];
+                Inverse[i][j] = Inverse[maxLineIndex][j];
+                Inverse[maxLineIndex][j] = temp;
             }
         }
 
@@ -266,8 +270,8 @@ bool GaussianInverseMatrix(double** A, double**B, int n)
         {
             Matrix[i][j] /= cur;
             //cout <<  Matrix[i][j] << " "<<  endl;
-            B[i][j] /= cur;
-            //cout << B[i][j] << " " <<endl;
+            Inverse[i][j] /= cur;
+            //cout << Inverse[i][j] << " " <<endl;
         }
         //puts("*****2");
         for (int j = 0; j < n; j++)
@@ -278,20 +282,29 @@ bool GaussianInverseMatrix(double** A, double**B, int n)
                 for (int k = 0; k < n; k++)
                 {
                     Matrix[j][k] -= Matrix[i][k] * temp;
-                    B[j][k] -= B[i][k] * temp;
+                    Inverse[j][k] -= Inverse[i][k] * temp;
                 }
             }
         }
 
     }
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            B[i][j] = Inverse[i][j];
+        }
+    }
+
     //puts("*****2");
     //delete memory
     for (int i = 0; i < n; i++)
     {
         delete Matrix[i];
+        delete Inverse[i];
     }
     delete Matrix;
-
+    delete Inverse;
     return true;
 }
 
@@ -305,6 +318,19 @@ void PrintMatrix(double **T, int dimension)
         for (int j = 0; j < dimension; j++)
         {
             cout << T[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+
+void PrintPoints(PointSet points, int dimension)
+{
+    for (int i = 0; i < points.size(); i++)
+    {
+        for (int j = 0; j < dimension; j++)
+        {
+            cout << points[i].x[j] << " ";
         }
         cout << endl;
     }
@@ -394,4 +420,26 @@ bool is_prime(int n)
     }
     return true;
 }
+
+
+long long Factorial(int d)
+{
+    long long ans = 1;
+    for (int i = 2; i <= d; i++)
+    {
+        ans = ans * i;
+    }
+    return ans;
+}
+
+double LogFactorial(int d)
+{
+    double ans = 0;
+    for (int i = 1; i <= d; i++)
+    {
+        ans += log(i);
+    }
+    return ans;
+}
+
 
