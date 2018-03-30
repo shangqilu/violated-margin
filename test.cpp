@@ -11,17 +11,13 @@ void TestSimplex()
     PointSet train_points = LoadData(train_data, train_label, dimension);
 
     //test for Simplex
-    HyperPlane plane = LPclassification(train_points, dimension, 2);
-    int n = train_points.size();
-    double cur_distance = MAX_DOUBLE;
-    for (int i = 0; i < n; i++)
-    {
-        double tmp_dis = Distance(plane, train_points[i], dimension);
-        if (tmp_dis < cur_distance)
-        {
-            cur_distance = tmp_dis;
-        }
+    HyperPlane plane = HyperPlane(dimension);
+    bool found = LPclassification(train_points, plane, dimension);
+    if (found) {
+        puts("find a solution");
     }
+    int n = train_points.size();
+    double cur_distance = MinimumSeparableDistance(train_points, plane);
     PrintHyperPlane(plane, plane.d);
     cout << "cur_dis: " << cur_distance << endl;
 }
@@ -59,7 +55,8 @@ void TestPerceptron()
     //test for Margin Perceptron
     //SimplePerceptron(train_points, dimension);
 
-    HyperPlane plane = IncreMarginPerceptron(train_points, dimension, 0.3);
+    HyperPlane plane = HyperPlane(dimension);
+    bool found = IncreMarginPerceptron(train_points, plane, dimension, 0.3);
     PrintHyperPlane(plane, plane.d);
 }
 
@@ -233,5 +230,6 @@ void TestDirectionalWidth()
     PointSet points = LoadData(train_data, train_label, dimension);
 
     double epsilon = 0.1;
-    DirectionalWidth(points, dimension, epsilon);
+    HyperPlane plane = HyperPlane(dimension);
+    DirectionalWidth(points, plane, dimension, epsilon);
 }

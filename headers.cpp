@@ -39,6 +39,35 @@ PointSet LoadData(char* filename, char* label_filename, int dimension)
     return trainPointSet;
 }
 
+//load data from single file
+PointSet LoadDataLibSVMFormat(char* filename, int dimension)
+{
+    PointSet points;
+    FILE *fp = fopen(filename, "r");
+    if (!fp) {
+        puts("cannot open file!");
+        return points;
+    }
+    while(!feof(fp)) {
+        Point cur_pt = Point(dimension);
+        fscanf(fp, "%d", &cur_pt.y);
+        char c;
+        int i;
+        double content;
+        while((c=fgetc(fp))!= '\n') {
+            if (c == EOF) {
+                break;
+            }
+            if (isdigit(c)) {
+                ungetc(c,fp);
+                fscanf(fp, "%d:%lf", &i, &content);
+                //cout << i << " " << content << endl;
+                cur_pt.x[i-1] = content;
+            }
+        }
+        points.push_back(cur_pt);
+    }
+}
 PointSet CopyPoints(PointSet points, int dimension)
 {
     int n = points.size();
@@ -124,6 +153,25 @@ double Distance(Point pt1, Point pt2, int dimension)
     return sqrt(dis);
 }
 
+
+double MinimumSeparableDistance(PointSet points, HyperPlane plane)
+{
+    int dimension = plane.d;
+    int n = points.size();
+    double min_margin = MAX_DOUBLE;
+    for (int i = 0; i < n; i++)
+    {
+        if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < 0)
+        {
+            return 0.0;
+        }
+        double cur_dis = Distance(plane, points[i], dimension);
+        if (cur_dis < min_margin ) {
+            min_margin = cur_dis;
+        }
+    }
+    return min_margin;
+}
 
 
 bool GaussianEquation(double** A, double* b, double* x, int n)
@@ -332,6 +380,7 @@ void PrintPoints(PointSet points, int dimension)
         {
             cout << points[i].x[j] << " ";
         }
+        cout << "label: " << points[i].y;
         cout << endl;
     }
 }

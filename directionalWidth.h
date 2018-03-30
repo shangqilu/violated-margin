@@ -96,9 +96,10 @@ struct HashTable{
     void PrintKey(Key key)
     {
         cout << "(";
-        for (int i = 0; i < key.d; i++) {
-            cout << key.x[i] << " ";
+        for (int i = 0; i < key.d-1; i++) {
+            cout << key.x[i] << ", ";
         }
+        cout << key.x[key.d-1];
         cout << ")" << endl;
     }
     bool Insert(Point point, int d, int index, Key key)
@@ -165,13 +166,13 @@ struct HashTable{
 void PrintBoudingBox(BoudingBox box);
 void MinimumBoudingBox(PointSet points, int dimension);
 
-void RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **MainTainT, int dimension, int realDimension);
+bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **MainTainT, int dimension, int realDimension);
 bool TwoApproxiDiameter(PointSet points, int dimension, int &s, int &t);
 PointSet SimpleCoreSet(PointSet points, double **MainTainT, int dimension, double epsilon);
 
 PointSet SmallerCoreSet(PointSet points, PointSet directionPoints, int dimension, double epsilon);
 
-HyperPlane DirectionalWidth(PointSet points, int dimension, double epsilon);
+bool DirectionalWidth(PointSet points, HyperPlane &plane, int dimension, double epsilon);
 
 bool OneDimensionClassification(PointSet points, HyperPlane &cur_plane, Point direction, double radius);
 

@@ -15,7 +15,7 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
     while(1){
         //choose the variable with the smallest index
         puts("pivoting...");
-        PrintSimplexNode(node);
+        //PrintSimplexNode(node);
         int min_index = n + m; //non basic variable starting form m
         int entering = n + m;
         for (int j = 0; j < n; j++) {
@@ -153,7 +153,7 @@ bool Initial_Simplex(Simplex_Node &node)
         node.C[j] = 0;
     }
     node.C[n-1] = -1;
-    PrintSimplexNode(node);
+    //PrintSimplexNode(node);
     int leaving = k;
     Pivot(node, leaving, n-1);
 
@@ -207,7 +207,7 @@ bool Initial_Simplex(Simplex_Node &node)
         //printf("choosing leaving: %d %d\n", leaving, min_index);
         if(leaving == m + n) {
             //unbounded
-            puts("It is unbounded!");
+            puts("It is unbounded in LP_aux!");
             break;
         } else{
             Pivot(node, leaving, entering);
@@ -215,7 +215,8 @@ bool Initial_Simplex(Simplex_Node &node)
 
     }
     if (!flag || fabs(node.v - 0) > ZERO) {
-        puts("infeasible!");
+        //puts("infeasible!");
+        delete back_c;
         return false;
     }
     //if x_n is a basic variable, we should do a pivot
@@ -265,9 +266,9 @@ bool Initial_Simplex(Simplex_Node &node)
             node.v += node.b[i]*back_c[node.B[i]-m];
         }
     }
-    for (int i = 0; i < n; i++)
-        cout << back_c[i] << " ";
-    cout << endl;
+    //for (int i = 0; i < n; i++)
+    //    cout << back_c[i] << " ";
+    //cout << endl;
     //puts("*****************");
     delete back_c;
     return true;
@@ -318,8 +319,9 @@ void PrintSimplexNode(Simplex_Node node)
     printf("Cur objecrive value %lf\n", node.v);
 }
 
-
-HyperPlane LPclassification(PointSet trainPoints, int dimension, int direction)
+//the direction range from 1 to d means d directions along the axes
+//if direction = 0, there are no direction constraints
+bool OneDirectionLPClassification(PointSet trainPoints, HyperPlane &plane, int dimension, int direction)
 {
     int number_constraints, number_variables;
     number_variables = 2*(dimension+1)+1;
@@ -390,15 +392,47 @@ HyperPlane LPclassification(PointSet trainPoints, int dimension, int direction)
         input_C[j] = 0;
     }
     input_C[number_variables-1] = 1;
-    cout << number_constraints << endl;
+    //cout << number_constraints << endl;
     //Simplex_Node node = Simplex_Node(input_A, input_b, input_C, number_constraints, number_variables);
     //PrintSimplexNode(node);
     LPresult result = Simplex(input_A, input_b, input_C, number_constraints, number_variables);
+
+    for (int i = 0; i < number_constraints; i++) {
+        delete input_A[i];
+    }
+    delete input_A;
+    delete input_b;
+    delete input_C;
+
+
+    if (result.flag == 0) {
+        return false;
+    }
     PrintLPresult(result, number_variables);
-    HyperPlane plane = HyperPlane(dimension);
     for (int j = 0; j < dimension; j++) {
         plane.w[j] = result.x[2*j]-result.x[2*j+1];
     }
     plane.b = result.x[2*dimension]-result.x[2*dimension+1];
-    return plane;
+    return true;
+}
+
+
+bool LPclassification(PointSet trainPoints, HyperPlane &plane, int dimension)
+{
+    HyperPlane cur_plane = HyperPlane(dimension);
+    double max_margin = 0;
+    int flag = 0;
+    for (int j = 0; j < dimension; j++) {
+        bool found = OneDirectionLPClassification(trainPoints, cur_plane, dimension, j+1);
+        if (found) {
+            flag = 1;
+            double cur_margin = MinimumSeparableDistance(trainPoints, cur_plane);
+            if (cur_margin > max_margin) {
+                plane = cur_plane;
+            }
+        }
+
+    }
+    if (!flag) return false;
+    else return true;
 }

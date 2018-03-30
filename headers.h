@@ -14,6 +14,15 @@
 #include <ctime>
 #include <cstdlib>
 
+
+#define __DEBUG__
+#ifdef __DEBUG__
+#define DEBUG(format,...) printf("File: "__FILE__", Line: %05d: "format"\n", __LINE__, ##__VA_ARGS__)
+#else
+#define DEBUG(format,...)
+#endif
+
+
 using namespace std;
 
 #define MAX_DOUBLE 1e9
@@ -64,6 +73,10 @@ typedef vector<Point> PointSet;
 
 PointSet LoadData(char* filename, char* label_filename, int dimension);
 
+
+//load data from single file in the format of libSVM
+PointSet LoadDataLibSVMFormat(char* filename, int dimension);
+
 PointSet CopyPoints(PointSet points, int dimension);
 
 
@@ -78,7 +91,7 @@ void PrintHyperPlane(HyperPlane plane, int dimension);
 double Distance(HyperPlane plane, Point pt, int dimension);
 
 double Distance(Point pt1, Point pt2, int dimension);
-
+double MinimumSeparableDistance(PointSet points, HyperPlane plane);
 
 bool GaussianEquation(double** A, double* b, double* x, int n);
 bool GaussianInverseMatrix(double** A, double**B, int n);
