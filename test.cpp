@@ -5,11 +5,14 @@ using namespace std;
 
 void TestSimplex()
 {
+    /*
     char train_data[] = "data/separable_test_2/titanic_train_data.asc";
     char train_label[] = "data/separable_test_2/titanic_train_label.asc";
-    int dimension = 2;
-    PointSet train_points = LoadData(train_data, train_label, dimension);
-
+    */
+    char filename[] = "data/iris_4.txt";
+    int dimension = 4;
+    PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
+    cout << train_points.size() << endl;
     //test for Simplex
     HyperPlane plane = HyperPlane(dimension);
     bool found = LPclassification(train_points, plane, dimension);
@@ -47,17 +50,30 @@ void TestSimplex2()
 
 void TestPerceptron()
 {
+    /*
     char train_data[] = "data/separable_test_2/titanic_train_data.asc";
     char train_label[] = "data/separable_test_2/titanic_train_label.asc";
     int dimension = 2;
     PointSet train_points = LoadData(train_data, train_label, dimension);
-
+    */
     //test for Margin Perceptron
     //SimplePerceptron(train_points, dimension);
 
+    char filename[] = "data/iris_4.txt";
+    int dimension = 4;
+    PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
+
     HyperPlane plane = HyperPlane(dimension);
     bool found = IncreMarginPerceptron(train_points, plane, dimension, 0.3);
-    PrintHyperPlane(plane, plane.d);
+    if(found) {
+        puts("find a solution");
+        double cur_distance = MinimumSeparableDistance(train_points, plane);
+        PrintHyperPlane(plane, plane.d);
+        cout << "cur_dis: " << cur_distance << endl;
+    }else {
+        puts("there is no solution");
+    }
+
 }
 
 void TestGaussianEquation()
@@ -218,18 +234,31 @@ void TestOneDimensionClassification()
 
 void TestDirectionalWidth()
 {
-
+    /*
     char train_data[] = "data/separable_test_2/titanic_train_data.asc";
     char train_label[] = "data/separable_test_2/titanic_train_label.asc";
     int dimension = 2;
-    /*
     char train_data[] = "data/titanic_3/titanic_train_data.asc";
     char train_label[] = "data/titanic_3/titanic_train_label.asc";
     int dimension = 3;
     */
-    PointSet points = LoadData(train_data, train_label, dimension);
+    //PointSet points = LoadData(train_data, train_label, dimension);
 
     double epsilon = 0.1;
+
+    char filename[] = "data/iris_4.txt";
+    int dimension = 4;
+    PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
+
     HyperPlane plane = HyperPlane(dimension);
-    DirectionalWidth(points, plane, dimension, epsilon);
+    bool found = DirectionalWidth(train_points, plane, dimension, epsilon);
+    if(found) {
+        puts("find a solution");
+        double cur_distance = MinimumSeparableDistance(train_points, plane);
+        PrintHyperPlane(plane, plane.d);
+        cout << "cur_dis: " << cur_distance << endl;
+    }else {
+        puts("there is no solution");
+    }
+
 }

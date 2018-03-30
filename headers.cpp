@@ -50,7 +50,13 @@ PointSet LoadDataLibSVMFormat(char* filename, int dimension)
     }
     while(!feof(fp)) {
         Point cur_pt = Point(dimension);
-        fscanf(fp, "%d", &cur_pt.y);
+        int label;
+        fscanf(fp, "%d", &label);
+        if (label == 1) {
+            cur_pt.y = 1;
+        }else {
+            cur_pt.y = -1;
+        }
         char c;
         int i;
         double content;
@@ -82,6 +88,15 @@ PointSet CopyPoints(PointSet points, int dimension)
         newPoints.push_back(tmp);
     }
     return newPoints;
+}
+
+void CopyHyperPlane(HyperPlane &plane1, HyperPlane &plane2)
+{
+    for (int i = 0; i < plane1.d; i++)
+    {
+        plane1.w[i] = plane2.w[i];
+    }
+    plane1.b = plane2.b;
 }
 
 double Dot(double* w, double *x, int dimension)
@@ -158,10 +173,12 @@ double MinimumSeparableDistance(PointSet points, HyperPlane plane)
 {
     int dimension = plane.d;
     int n = points.size();
+
+    cout << "***" << n << endl;
     double min_margin = MAX_DOUBLE;
     for (int i = 0; i < n; i++)
     {
-        if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < 0)
+        if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < ZERO)
         {
             return 0.0;
         }

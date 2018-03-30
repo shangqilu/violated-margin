@@ -520,7 +520,8 @@ bool DirectionalWidth(PointSet points, HyperPlane &optimal_plane, int dimension,
 
             if (separable && cur_distance > max_margin)
             {
-                optimal_plane = cur_plane;
+                //optimal_plane = cur_plane; // cannot assign directly
+                CopyHyperPlane(optimal_plane, cur_plane);
                 max_margin = cur_distance;
             }
         }
@@ -654,7 +655,7 @@ void ComputingDirections(PointSet &points, double*angles, int curDimension, int 
         points.push_back(cur_pt);
         if (points.size() % 10000 == 0)
         {
-            cout << "current number of direcitons: "
+            cout << "current number of direcitons: ";
             cout << points.size() << endl;
         }
         return;

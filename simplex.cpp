@@ -3,18 +3,18 @@
 
 LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int n)
 {
-    puts("RunSimplex...");
+    //puts("RunSimplex...");
     Simplex_Node node = Simplex_Node(input_A, input_b, input_C, m, n);
     LPresult result = LPresult(n);
     bool re = Initial_Simplex(node);
     if (!re) {
-        puts("It is infeasible!");
+        //puts("It is infeasible!");
         return result;
     }
 
     while(1){
         //choose the variable with the smallest index
-        puts("pivoting...");
+        //puts("pivoting...");
         //PrintSimplexNode(node);
         int min_index = n + m; //non basic variable starting form m
         int entering = n + m;
@@ -28,10 +28,10 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
                 }
             }
         }
-        printf("choosing entering: %d %d\n", entering, min_index);
+        //printf("choosing entering: %d %d\n", entering, min_index);
         if(entering == n + m) {
             //end computing with an optimal solution
-            puts("find the optimal value");
+            //puts("find the optimal value");
             result.flag = 1;
             break;
         }
@@ -48,7 +48,7 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
                     max_delta = tmp;
                     min_index = node.B[i];
                 }
-                if (fabs(max_delta - tmp)< 1e-6) {
+                if (fabs(max_delta - tmp)< ZERO) {
                     if(min_index > node.B[i]) {
                         leaving = i;
                         max_delta = tmp;
@@ -57,10 +57,10 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
                 }
             }
         }
-        printf("choosing leaving: %d %d\n", leaving, min_index);
+        //printf("choosing leaving: %d %d\n", leaving, min_index);
         if(leaving == m + n) {
             //unbounded
-            puts("It is unbounded!");
+            //puts("It is unbounded!");
             return result;
         } else{
             Pivot(node, leaving, entering);
@@ -119,7 +119,7 @@ void Pivot(Simplex_Node &node, int leaving, int entering)
 
 bool Initial_Simplex(Simplex_Node &node)
 {
-    puts("Run Initial_Simplex...");
+    //puts("Run Initial_Simplex...");
     int k = -1;
     double min_value = MAX_DOUBLE;
 
@@ -133,14 +133,14 @@ bool Initial_Simplex(Simplex_Node &node)
     }
     //The initial basic solution is feasible
     if (min_value >= 0) {
-        puts("initial basic solution ok ");
+        //puts("initial basic solution ok ");
         return true;
     }
     //add a new non basic variable x_n
     node.n++;
     int m = node.m;
     int n = node.n;
-    puts("constructing LP_aux ...");
+    //puts("constructing LP_aux ...");
     for (int i = 0; i < m; i++) {
         node.A[i][n-1] = -1;
     }
@@ -178,7 +178,7 @@ bool Initial_Simplex(Simplex_Node &node)
         //printf("choosing entering: %d %d\n", entering, min_index);
         if(entering == n + m) {
             //end computing with an optimal solution
-            puts("find the optimal value in Initial-simplex");
+            //puts("find the optimal value in Initial-simplex");
             flag = 1;
             break;
         }
@@ -408,7 +408,7 @@ bool OneDirectionLPClassification(PointSet trainPoints, HyperPlane &plane, int d
     if (result.flag == 0) {
         return false;
     }
-    PrintLPresult(result, number_variables);
+    //PrintLPresult(result, number_variables);
     for (int j = 0; j < dimension; j++) {
         plane.w[j] = result.x[2*j]-result.x[2*j+1];
     }
@@ -428,7 +428,16 @@ bool LPclassification(PointSet trainPoints, HyperPlane &plane, int dimension)
             flag = 1;
             double cur_margin = MinimumSeparableDistance(trainPoints, cur_plane);
             if (cur_margin > max_margin) {
-                plane = cur_plane;
+                printf("find a solution in dimension %d with margin %lf\n", j, cur_margin);
+                PrintHyperPlane(cur_plane, cur_plane.d);
+                max_margin = cur_margin;
+                /*
+                for (int j = 0; j < dimension; j++) {
+                    plane.w[j] = cur_plane.w[j];
+                }
+                plane.b = cur_plane.b;
+                */
+                CopyHyperPlane(plane, cur_plane);
             }
         }
 

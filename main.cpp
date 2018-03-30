@@ -11,6 +11,7 @@ PointSet Sampling(PointSet points, int dimension, double p)
 {
     //srand(time(NULL));   //in reality we should use time seed
     if (p > 1) {
+        puts("p>1");
         return points;
     }
     int n = points.size();
@@ -56,7 +57,6 @@ bool ViolatedMargin(PointSet points, HyperPlane &optimal_plane, int dimension, i
     cout << "p: " << p << endl;
     //make sure in the sample set the plane
     //violating no more than k_prime points
-    if (p > 1) p = 1;
     double k_prime = temp * k * p;
     cout << "k_prime: " << k_prime << endl;
     //srand(time(NULL));
@@ -65,31 +65,42 @@ bool ViolatedMargin(PointSet points, HyperPlane &optimal_plane, int dimension, i
 
     //the second time sampling probability : dimension/k_prime
     //repeating k_prime^d * exp^d / d^d ln(1/delta) times
-    int times = ceil(pow(k_prime, dimension) * exp(dimension)/pow(1.0*dimension, dimension) * log(1/delta));
-    printf("need repeating times: %d \n", times);
+
+    long long int times = (long long)(pow(k_prime, dimension) * exp(dimension)/pow(1.0*dimension, dimension) * log(1/delta));
+    cout << times << endl;
+    printf("need repeating times: %lld \n", times);
     double max_margin = 0;
-    for (int curtime = 0; curtime < times; curtime++)
+    for (int curtime = 0; curtime < 1000000; curtime++)
     {
         printf("Current repeating time: %d\n", curtime);
-        double p = dimension/k_prime;
+        double p = 1.0*dimension/k_prime;
         PointSet subsubpoints = Sampling(subpoints, dimension, p);
+        printf("Sub sub Set size %d ...\n", subsubpoints.size());
         HyperPlane plane = HyperPlane(dimension);
         bool found = MarginClasification(subsubpoints, plane, dimension, rho, method);
         if (found) {
+            puts("find a solution in the subsub set");
             double cur_dis = MinimumSeparableDistance(subpoints, plane);
             if (cur_dis > max_margin) {
                 max_margin = cur_dis;
-                optimal_plane = plane;
+                //optimal_plane = plane;
+                printf("a solution on the sub set ");
+                cout << max_margin << endl;
+                PrintHyperPlane(plane, dimension);
+                CopyHyperPlane(optimal_plane, plane);
+                break;
             }
         }
     }
 
     if (max_margin > 0) {
-        puts("find a hyperplane classifying the subpoints");
+        PrintHyperPlane(optimal_plane, dimension);
+        puts("find a hyperplane classifying the subpoints correctly");
     }
 
     double real_margin = MinimumSeparableDistance(points, optimal_plane);
     if (real_margin > 0) {
+        puts("Separating original set correctly");
         return true;
     }else {
         return false;
@@ -110,16 +121,20 @@ int main()
 
     //TestSimpleCoreSet();
 
-    char filename[] = "data/diabetes_8.txt";
-    int dimension = 8;
+    char filename[] = "data/skin_nonskin_3.txt";
+    int dimension = 3;
     PointSet trainPoints = LoadDataLibSVMFormat(filename, dimension);
     HyperPlane plane = HyperPlane(dimension);
     int k = trainPoints.size() * 0.01;
     double epsilon = 0.1;
     double rho = 0.1;
     double delta = 0.5;
-    double method = 2;
+    double method = 1;
     ViolatedMargin(trainPoints, plane, dimension, k, epsilon, rho, delta, method);
+
+    //TestDirectionalWidth();
+
+
 
     return 0;
 }

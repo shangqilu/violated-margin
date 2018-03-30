@@ -78,7 +78,7 @@ PointSet LoadData(char* filename, char* label_filename, int dimension);
 PointSet LoadDataLibSVMFormat(char* filename, int dimension);
 
 PointSet CopyPoints(PointSet points, int dimension);
-
+void CopyHyperPlane(HyperPlane &plane1, HyperPlane &plane2);
 
 double Dot(double* w, double *x, int dimension);
 
