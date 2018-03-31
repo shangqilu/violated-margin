@@ -25,8 +25,8 @@
 
 using namespace std;
 
-#define MAX_DOUBLE 1e9
-#define ZERO  1e-6
+#define MAX_DOUBLE 1e300
+#define ZERO  1e-300
 struct HyperPlane
 {
     double *w;
@@ -91,8 +91,8 @@ void PrintHyperPlane(HyperPlane plane, int dimension);
 double Distance(HyperPlane plane, Point pt, int dimension);
 
 double Distance(Point pt1, Point pt2, int dimension);
-double MinimumSeparableDistance(PointSet points, HyperPlane plane);
-
+bool MinimumSeparableDistance(PointSet points, HyperPlane plane, double &min_dis);
+bool MinimumViolatedDistance(PointSet points, HyperPlane plane, double &min_dis, int k, int &reak_k);
 bool GaussianEquation(double** A, double* b, double* x, int n);
 bool GaussianInverseMatrix(double** A, double**B, int n);
 

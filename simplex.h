@@ -52,6 +52,7 @@ struct LPresult{
     LPresult(int d)
     {
         this->x = new double[d];
+        for (int i = 0; i < d; i++) this->x[i] = 0;
         this->flag = 0;
         this->value = 0;
     }

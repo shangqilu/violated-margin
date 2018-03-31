@@ -41,8 +41,8 @@ bool MarginPerceptron(PointSet trainPoints, HyperPlane &plane, int dimension, do
     int n = trainPoints.size();
     int iter_cnt = 0;
     double maxIters = (2+2*epsilon)*R*R/(epsilon*epsilon*y_guess*y_guess);
-    printf("maxIters: %lf\n", maxIters);
-    cout << "R: " << R << " y_guess: " << y_guess << endl;
+    //printf("maxIters: %lf\n", maxIters);
+    //cout << "R: " << R << " y_guess: " << y_guess << endl;
     for (iter_cnt = 0; iter_cnt < maxIters; iter_cnt++)
     {
         /*

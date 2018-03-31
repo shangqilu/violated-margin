@@ -408,7 +408,8 @@ bool OneDirectionLPClassification(PointSet trainPoints, HyperPlane &plane, int d
     if (result.flag == 0) {
         return false;
     }
-    //PrintLPresult(result, number_variables);
+    //printf("number of constraints: %d\n", number_constraints);
+    PrintLPresult(result, number_variables);
     for (int j = 0; j < dimension; j++) {
         plane.w[j] = result.x[2*j]-result.x[2*j+1];
     }
@@ -426,8 +427,15 @@ bool LPclassification(PointSet trainPoints, HyperPlane &plane, int dimension)
         bool found = OneDirectionLPClassification(trainPoints, cur_plane, dimension, j+1);
         if (found) {
             flag = 1;
-            double cur_margin = MinimumSeparableDistance(trainPoints, cur_plane);
-            if (cur_margin > max_margin) {
+            double cur_margin = 0;
+            bool separable = MinimumSeparableDistance(trainPoints, cur_plane, cur_margin);
+            if (!separable) {
+                printf("wrong in simplex, current dimension %d\n", j);
+                PrintHyperPlane(cur_plane, dimension);
+                flag = 0;
+
+            }
+            if (separable && cur_margin > max_margin) {
                 printf("find a solution in dimension %d with margin %lf\n", j, cur_margin);
                 PrintHyperPlane(cur_plane, cur_plane.d);
                 max_margin = cur_margin;

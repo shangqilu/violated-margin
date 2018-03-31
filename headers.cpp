@@ -169,26 +169,66 @@ double Distance(Point pt1, Point pt2, int dimension)
 }
 
 
-double MinimumSeparableDistance(PointSet points, HyperPlane plane)
+bool MinimumSeparableDistance(PointSet points, HyperPlane plane, double &min_dis)
 {
     int dimension = plane.d;
     int n = points.size();
-
-    cout << "***" << n << endl;
+    min_dis = 0;
+    //cout << "***" << n << endl;
     double min_margin = MAX_DOUBLE;
     for (int i = 0; i < n; i++)
     {
         if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < ZERO)
         {
-            return 0.0;
+            return false;
         }
         double cur_dis = Distance(plane, points[i], dimension);
         if (cur_dis < min_margin ) {
             min_margin = cur_dis;
         }
     }
-    return min_margin;
+    if (fabs(min_margin - MAX_DOUBLE) < ZERO) {
+        return false;
+    } else {
+        min_dis = min_margin;
+        return true;
+    }
 }
+
+
+bool MinimumViolatedDistance(PointSet points, HyperPlane plane, double &min_dis, int k, int &real_k)
+{
+    int dimension = plane.d;
+    int n = points.size();
+    min_dis = 0;
+    //cout << "***" << n << endl;
+    double min_margin = MAX_DOUBLE;
+    int wrong_num = 0;
+    for (int i = 0; i < n; i++)
+    {
+        if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < ZERO)
+        {
+            wrong_num ++;
+        }else {
+            double cur_dis = Distance(plane, points[i], dimension);
+            if (cur_dis < min_margin ) {
+                min_margin = cur_dis;
+            }
+        }
+    }
+    real_k = wrong_num;
+    if (wrong_num > k) {
+        printf("wrong numbers : %d\n", wrong_num);
+        return false;
+    }
+    if (fabs(min_margin - MAX_DOUBLE) < ZERO) {
+        return false;
+    } else {
+        min_dis = min_margin;
+        return true;
+    }
+}
+
 
 
 bool GaussianEquation(double** A, double* b, double* x, int n)
@@ -303,7 +343,7 @@ bool GaussianInverseMatrix(double** A, double**B, int n)
         }
         if(fabs(colMax) < ZERO)
         {
-            puts("There is no solution to the inverse matrix");
+            //puts("There is no solution to the inverse matrix");
             //singular matrix
             for (int i = 0; i < n; i++)
             {
@@ -472,7 +512,7 @@ int LargestPrimeBelow(int m)
     {
         if (is_prime(cur))
         {
-            printf("%d's largest prime is %d\n", m, cur);
+            //printf("%d's largest prime is %d\n", m, cur);
             return cur;
         }
     }

@@ -36,13 +36,16 @@ bool TwoApproxiDiameter(PointSet points, int dimension, int &s, int &t)
             break;
         }
         cnt ++ ;
-        if (cnt == MaxIterTwoApprox) {
+        if (cnt == MaxIterTwoApprox)
+        {
             break;
         }
     }
-    if(cnt == MaxIterTwoApprox) {
+    if(cnt == MaxIterTwoApprox)
+    {
         return false;
-    }else
+    }
+    else
         return true;
 }
 
@@ -55,30 +58,33 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
     {
         return true;
     }
-    puts("Computing the approximate minimum bouding box recursively");
-    printf("cur dimension %d...\n", dimension);
+    //puts("Computing the approximate minimum bouding box recursively");
+    //printf("cur dimension %d...\n", dimension);
 
     int n = points.size();
     if (n < 2)
     {
-        puts("there are no more than 2 points!");
+        //puts("there are no more than 2 points!");
         return false;
     }
     int s, t;
     Point d_axis = Point(dimension);
     bool found = TwoApproxiDiameter(points, dimension, s, t);
-    if (!found) {
-        puts("points are in the same coordinates in current dimension!!! ");
-        puts("data can be presented in lower dimension");
-        puts("choose d dimension axis as the normal vector");
+    if (!found)
+    {
+        //puts("points are in the same coordinates in current dimension!!! ");
+        //puts("data can be presented in lower dimension");
+        //puts("choose d dimension axis as the normal vector");
         Point axis = Point(dimension);
         axis.x[dimension-1] = 1;
         d_axis = PointMinus(axis, points[t], dimension);
 
-    } else {
+    }
+    else
+    {
         d_axis = PointMinus(points[s], points[t], dimension);
     }
-    printf("current s and t: %d %d\n", s, t);
+    //printf("current s and t: %d %d\n", s, t);
     //all points is above point t
 
     //find those d-1 basis
@@ -127,7 +133,14 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
             double sum = 0;
             for (int j = 0; j < dimension - number_variables; j++)
             {
-                sum += CurT[j][dimension-1-i]*(1-points[t].x[j]);
+                if (fabs(1-points[t].x[j]) < ZERO)   //when this happens, the CurT would be irreversible
+                {
+                    sum += CurT[j][dimension-1-i]*(2-points[t].x[j]);
+                }
+                else
+                {
+                    sum += CurT[j][dimension-1-i]*(1-points[t].x[j]);
+                }
             }
             for (int j = dimension - number_variables; j < dimension; j++)
             {
@@ -139,13 +152,21 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
         bool solve = GaussianEquation(A, b, x, number_variables);
         if (!solve)
         {
-            puts("the equation set is insouble!");
+            //puts("the equation set is insouble!");
             break;
         }
 
         for (int j = 0; j < dimension - number_variables; j++)
         {
-            CurT[j][dimension-1-number_variables] = 1 - points[t].x[j];
+            if (fabs(1-points[t].x[j]) < ZERO)   //when this happens, the CurT would be irreversible
+            {
+                CurT[j][dimension-1-number_variables] = 2 - points[t].x[j];
+            }
+            else
+            {
+                CurT[j][dimension-1-number_variables] = 1 - points[t].x[j];
+            }
+
         }
         for (int j = dimension - number_variables; j < dimension; j++)
         {
@@ -155,8 +176,8 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
 
 
     //Print Current basis
-    puts("current basis ...");
-    PrintMatrix(CurT, realDimension+1);
+    //puts("current basis ...");
+    //PrintMatrix(CurT, realDimension+1);
 
     //compute the inverse Matrix of cur_T
     double **Inverse_M = new double*[realDimension+1];
@@ -168,18 +189,19 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
     bool re = GaussianInverseMatrix(CurT, Inverse_M, realDimension+1);
     if (!re)
     {
-        puts("there is no inverse Matrix about CurT");
+        puts("there is no inverse Matrix about CurT");   //done
+        //return false;
     }
-    puts("inverse Matrix...");
-    PrintMatrix(Inverse_M, realDimension+1);
+    //puts("inverse Matrix...");
+    //PrintMatrix(Inverse_M, realDimension+1);
 
 
     TransformingPoints(points, Inverse_M, realDimension); ////!!!!!!
-    puts("after transforming");
-    PrintPoints(points, realDimension);
+    //puts("after transforming");
+    //PrintPoints(points, realDimension);
     MatrixMultiply(Inverse_M, MainTainT, MainTainT, realDimension + 1);
-    puts("Maintain Matrix...");
-    PrintMatrix(MainTainT, realDimension+1);
+    //puts("Maintain Matrix...");
+    //PrintMatrix(MainTainT, realDimension+1);
 
     //find the point with the largest value in current dimension
     double maxValue = 0;
@@ -199,8 +221,10 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
         delete CurT[i];
         delete Inverse_M[i];
     }
-    if (dimension > 1) {
-        for (int i = 0; i < dimension-1; i++) {
+    if (dimension > 1)
+    {
+        for (int i = 0; i < dimension-1; i++)
+        {
             delete A[i];
         }
         delete A;
@@ -229,7 +253,7 @@ void MinimumBoudingBox(PointSet points, int dimension)
 
     BoudingBox box = BoudingBox(dimension);
     RecursionMinimumBoudingBox(points, box, MainTainT, dimension, dimension);
-    PrintBoudingBox(box);
+    //PrintBoudingBox(box);
 
     puts("the new points");
     int n = points.size();
@@ -241,7 +265,7 @@ void MinimumBoudingBox(PointSet points, int dimension)
         }
         cout << endl;
     }
-    PrintMatrix(MainTainT, dimension+1);
+    //PrintMatrix(MainTainT, dimension+1);
 }
 
 
@@ -260,12 +284,13 @@ PointSet SimpleCoreSet(PointSet points, double **MainTainT, int dimension, doubl
 
 
     bool found = RecursionMinimumBoudingBox(points, box, MainTainT, dimension, dimension);
-    if (!found) {
+    if (!found)
+    {
 
     }
-    PrintBoudingBox(box);
-    puts("points after computing bounding box...");
-    PrintPoints(points, dimension);
+    //PrintBoudingBox(box);
+    //puts("points after computing bounding box...");
+    //PrintPoints(points, dimension);
 
     //map the bounding box into a hypercube with length 2, centering origin
     double **HypercubeM = new double*[dimension+1];
@@ -282,7 +307,9 @@ PointSet SimpleCoreSet(PointSet points, double **MainTainT, int dimension, doubl
                     if (box.U[j] > ZERO)
                     {
                         HypercubeM[i][j] = 2/box.U[j];
-                    }else {
+                    }
+                    else
+                    {
                         HypercubeM[i][j] = 1;
                         // non zero to make sure the matrix is reversible
                     }
@@ -317,27 +344,34 @@ PointSet SimpleCoreSet(PointSet points, double **MainTainT, int dimension, doubl
     TransformingPoints(points, HypercubeM, dimension);
     MatrixMultiply(HypercubeM, MainTainT, MainTainT, dimension+1);
 
-    puts("points after in hypercube...");
-    PrintPoints(points, dimension);
+    //puts("points after in hypercube...");
+    //PrintPoints(points, dimension);
     //divided the box into pillars find the highest and lowest point in each pillar
     double C_d = 1.0/(dimension*(4*dimension+1)); //a parameter
     int M = ceil(4/(epsilon*C_d)); //number of intervals in each dimension
-    printf("M: %d \n", M);
+    //printf("M: %d \n", M);
     int n = points.size();
     int prime = LargestPrimeBelow(1.5*n);
     HashTable table = HashTable(1.5*n, prime, dimension-1);
     Key key = Key(dimension-1, M);
     for (int i = 0; i < n; i++)
     {
+        //cout << " " << i << " ";
         for (int j = 0; j < dimension - 1; j++)
         {
             int cur_k = floor(1.0*(points[i].x[j] + 1)*M/2);
-            if (cur_k == M) {
-                cur_k --;
+            if (cur_k >= M)
+            {
+                cur_k = M-1;
+            }
+            if (cur_k < 0)
+            {
+                cur_k = 0;
             }
             key.x[j] = cur_k;
             //key = (key * M + cur_k) % prime;    //there is a problem with hash table!!!
         }
+        //printf("Insert point %d\n", i);
         table.Insert(points[i], dimension, i, key);
     }
     vector<int> index_coreset = table.Travel();
@@ -429,7 +463,7 @@ PointSet SmallerCoreSet(PointSet points, PointSet directionPoints, int dimension
 
 bool DirectionalWidth(PointSet points, HyperPlane &optimal_plane, int dimension, double epsilon)
 {
-    puts("separating positive points and negative points");
+    //puts("separating positive points and negative points");
     //find +1 points and -1 points
     PointSet positivePoints, negativePoints;
     int n = points.size();
@@ -467,29 +501,31 @@ bool DirectionalWidth(PointSet points, HyperPlane &optimal_plane, int dimension,
 
     double *angles = new double[dimension-1];
     PointSet directionPoints;
-    puts("computing directions...");
+    //puts("computing directions...");
     ComputingDirections(directionPoints, angles, 1, dimension, delta, radius);
-    puts("computing coreSet...");
+    //puts("computing coreSet...");
     //compute the epsilon-core set respectively according to those directions
+    //printf("the positive set size: %d\n", positivePoints.size());
+    //printf("the negative set size: %d\n", negativePoints.size());
     PointSet positiveCoreSet = SmallerCoreSet(positivePoints, directionPoints, dimension, epsilon);
     PointSet negativeCoreSet = SmallerCoreSet(negativePoints, directionPoints, dimension, epsilon);
 
-    printf("the positive coreset size: %d\n", positiveCoreSet.size());
-    printf("the negative coreset size: %d\n", negativeCoreSet.size());
+    //printf("the positive coreset size: %d\n", positiveCoreSet.size());
+    //printf("the negative coreset size: %d\n", negativeCoreSet.size());
 
 
     //merge the two core set
     positiveCoreSet.insert(positiveCoreSet.end(), negativeCoreSet.begin(), negativeCoreSet.end());
-    cout << "The CoreSet size...";
-    cout << positiveCoreSet.size() << endl;
-    PrintPoints(positiveCoreSet, dimension);
+    //cout << "The CoreSet size...";
+    //cout << positiveCoreSet.size() << endl;
+    //PrintPoints(positiveCoreSet, dimension);
     //compute a hyperplane along each direction
     //actually the angle of core set and classification may be different !!!!!
     //a different direction points the angle is epsilon
     radius = 1;
     directionPoints.clear();
     ComputingDirections(directionPoints, angles, 1, dimension, epsilon, radius);
-    printf("there are %d direction points\n", directionPoints.size());
+    //printf("there are %d direction points\n", directionPoints.size());
     double max_margin = 0;
     //
     for (int i = 0; i < directionPoints.size(); i++)
@@ -499,25 +535,12 @@ bool DirectionalWidth(PointSet points, HyperPlane &optimal_plane, int dimension,
         //compute the margin of current plane
         if (found)
         {
-            bool separable = true;
+
             //puts("separable on those coreset points");
             //PrintHyperPlane(cur_plane, dimension);
             //check each hyperplane direction with the original data
             double cur_distance = MAX_DOUBLE;
-            for (int i = 0; i < n; i++)
-            {
-                if((Dot(cur_plane.w, points[i].x, dimension) + cur_plane.b)*points[i].y < 0) {
-                    //cout << "non separable" << endl;
-                    separable = false;
-                    break;
-                }
-                double tmp_dis = Distance(cur_plane, points[i], dimension);
-                if (tmp_dis < cur_distance)
-                {
-                    cur_distance = tmp_dis;
-                }
-            }
-
+            bool separable = MinimumSeparableDistance(points, cur_plane, cur_distance);
             if (separable && cur_distance > max_margin)
             {
                 //optimal_plane = cur_plane; // cannot assign directly
@@ -535,7 +558,9 @@ bool DirectionalWidth(PointSet points, HyperPlane &optimal_plane, int dimension,
         cout << max_margin << endl;
         puts("find an solution along those directions");
         return true;
-    }else {
+    }
+    else
+    {
         return false;
     }
 
@@ -556,12 +581,15 @@ bool OneDimensionClassification(PointSet points, HyperPlane &cur_plane, Point di
     int *prefix_sum_positive = new int[n];
     int *suffix_sum_negative = new int[n];
 
-    for (int i = 0; i < n; i++) suffix_sum_negative[i] = 0;
-    for (int i = 0; i < n; i++) prefix_sum_positive[i] = 0;
+    for (int i = 0; i < n; i++)
+        suffix_sum_negative[i] = 0;
+    for (int i = 0; i < n; i++)
+        prefix_sum_positive[i] = 0;
     if (one_pts[0].y == 1)
     {
         prefix_sum_positive[0] = 1;
-    }else
+    }
+    else
     {
         prefix_sum_positive[0] = 0;
     }
@@ -576,7 +604,9 @@ bool OneDimensionClassification(PointSet points, HyperPlane &cur_plane, Point di
     if (one_pts[n-1].y == -1)
     {
         suffix_sum_negative[n-1] = 1;
-    } else{
+    }
+    else
+    {
         suffix_sum_negative[n-1] = 0;
     }
     for (int i = n-2; i >= 0; i--)
@@ -653,11 +683,13 @@ void ComputingDirections(PointSet &points, double*angles, int curDimension, int 
             cur_pt.x[realDimension-1] *= cos(angles[j]);
         }
         points.push_back(cur_pt);
+        /*
         if (points.size() % 10000 == 0)
         {
             cout << "current number of direcitons: ";
             cout << points.size() << endl;
         }
+        */
         return;
     }
     double cur_angle = 0;

@@ -20,9 +20,13 @@ void TestSimplex()
         puts("find a solution");
     }
     int n = train_points.size();
-    double cur_distance = MinimumSeparableDistance(train_points, plane);
-    PrintHyperPlane(plane, plane.d);
-    cout << "cur_dis: " << cur_distance << endl;
+    double cur_distance = 0;
+    bool separable = MinimumSeparableDistance(train_points, plane, cur_distance);
+    if (separable) {
+        PrintHyperPlane(plane, plane.d);
+        cout << "cur_dis: " << cur_distance << endl;
+    }
+
 }
 
 void TestSimplex2()
@@ -67,9 +71,12 @@ void TestPerceptron()
     bool found = IncreMarginPerceptron(train_points, plane, dimension, 0.3);
     if(found) {
         puts("find a solution");
-        double cur_distance = MinimumSeparableDistance(train_points, plane);
-        PrintHyperPlane(plane, plane.d);
-        cout << "cur_dis: " << cur_distance << endl;
+        double cur_distance = 0;
+        bool separable = MinimumSeparableDistance(train_points, plane, cur_distance);
+        if (separable) {
+            PrintHyperPlane(plane, plane.d);
+            cout << "cur_dis: " << cur_distance << endl;
+        }
     }else {
         puts("there is no solution");
     }
@@ -183,6 +190,15 @@ void TestSmallerCoreSetandComputingDirection()
     PrintPoints(smallerSet, dimension);
 }
 
+void TestComputingDirections()
+{
+    PointSet directionPoints;
+    int dimension = 4;
+    double *angles = new double[dimension];
+    double epsilon = 0.1;
+    ComputingDirections(directionPoints, angles, 1, dimension, epsilon, 1);
+    printf("there are %d directions\n", directionPoints.size());
+}
 
 void TestOneDimensionClassification()
 {
@@ -246,19 +262,38 @@ void TestDirectionalWidth()
 
     double epsilon = 0.1;
 
-    char filename[] = "data/iris_4.txt";
-    int dimension = 4;
+    char filename[] = "data/skin_nonskin_3.txt";
+    int dimension = 3;
     PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
 
     HyperPlane plane = HyperPlane(dimension);
     bool found = DirectionalWidth(train_points, plane, dimension, epsilon);
     if(found) {
         puts("find a solution");
-        double cur_distance = MinimumSeparableDistance(train_points, plane);
-        PrintHyperPlane(plane, plane.d);
-        cout << "cur_dis: " << cur_distance << endl;
+        double cur_distance = 0;
+        bool separable = MinimumSeparableDistance(train_points, plane, cur_distance);
+        if (separable) {
+            PrintHyperPlane(plane, plane.d);
+            cout << "cur_dis: " << cur_distance << endl;
+        }
+
     }else {
         puts("there is no solution");
     }
 
+}
+
+
+void TestViolatedMargin(int method)
+{
+    char filename[] = "data/skin_nonskin_3.txt";
+    //char filename[] = "data/svm_guide_4.txt";
+    int dimension = 3;
+    PointSet trainPoints = LoadDataLibSVMFormat(filename, dimension);
+    HyperPlane plane = HyperPlane(dimension);
+    int k = trainPoints.size() * 0.06;
+    double epsilon = 0.1;
+    double rho = 0.1;
+    double delta = 0.5;
+    ApproximateViolatedMargin(trainPoints, plane, dimension, k, epsilon, rho, delta, method);
 }

@@ -105,6 +105,11 @@ struct HashTable{
     bool Insert(Point point, int d, int index, Key key)
     {
         int value = Hash_func(key);
+        if (index == 37458) {
+            printf(" %d ", value);
+            PrintKey(key);
+        }
+
         value = value - 1;
         int di = (value + 1) % M;
         while(!Empty[di] && !key_match(table[di], key)) {
@@ -115,8 +120,8 @@ struct HashTable{
             }
         }
         if (Empty[di]) {  //insert current point
-            printf("Empty: index %d ", index);
-            PrintKey(key);
+            //printf("Empty: index %d ", index);
+            //PrintKey(key);
             Empty[di] = false;
             table[di].high_index = index;
             table[di].high_value = point.x[d-1];
@@ -129,8 +134,8 @@ struct HashTable{
         }
 
         if (!Empty[di] && key_match(table[di], key)) {//find the slot and update
-            printf("update: index %d", index);
-            PrintKey(key);
+            //printf("Update: index %d ", index);
+            //PrintKey(key);
             if (point.x[d-1] > table[di].high_value) {
                 table[di].high_value = point.x[d-1];
                 table[di].high_index = index;
@@ -146,7 +151,7 @@ struct HashTable{
     vector<int> Travel() //report all the points in hash table
     {
         vector<int> index_points;
-        puts("traveling the hash table");
+        //puts("traveling the hash table");
         for (int i = 0; i < M; i++)
         {
             if (!Empty[i]) {
@@ -157,7 +162,7 @@ struct HashTable{
                 }
             }
         }
-        cout << index_points.size() << endl;
+        //cout << index_points.size() << endl;
         return index_points;
     }
 

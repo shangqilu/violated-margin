@@ -5,6 +5,7 @@
 #include "perceptron.h"
 #include "simplex.h"
 #include "directionalWidth.h"
+#include "violatedMargin.h"
 
 using namespace std;
 
@@ -24,8 +25,11 @@ void TestSimpleCoreSet();
 
 void TestSmallerCoreSetandComputingDirection();
 
+void TestComputingDirections();
 void TestOneDimensionClassification();
 
 void TestDirectionalWidth();
+
+void TestViolatedMargin(int method);
 
 #endif // TEST_H_INCLUDED
