@@ -32,4 +32,5 @@ void TestDirectionalWidth();
 
 void TestViolatedMargin(int method);
 
+void TestSampling();
 #endif // TEST_H_INCLUDED

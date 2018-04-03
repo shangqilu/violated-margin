@@ -4,7 +4,7 @@
 //return a hyper-plane violated no more than (1+epsilon)*k points
 //and the margin is no less than (1- rho)optimal_margin
 //with high successful probability no less than 1 - delta
-bool ApproximateViolatedMargin(PointSet points, HyperPlane &optimal_plane, int dimension,
+bool ApproximateViolatedMargin(PointSet &points, HyperPlane &optimal_plane, int dimension,
                                int k, double epsilon, double rho, double delta, int method)
 {
     int n = points.size();
@@ -26,6 +26,7 @@ bool ApproximateViolatedMargin(PointSet points, HyperPlane &optimal_plane, int d
     }
     cout << "k: " << k << " k_prime: " << k_prime << endl;
     PointSet subpoints = Sampling(points, dimension, p);
+    
     printf("n_prime: %d ...\n", subpoints.size());
 
     bool found = ViolatedMargin(subpoints, optimal_plane, dimension, k_prime, rho, delta, method);
@@ -53,7 +54,7 @@ bool ApproximateViolatedMargin(PointSet points, HyperPlane &optimal_plane, int d
 
 
 
-bool ViolatedMargin(PointSet points, HyperPlane &optimal_plane, int dimension,
+bool ViolatedMargin(PointSet &points, HyperPlane &optimal_plane, int dimension,
                     int k, double rho, double delta, int method)
 {
     //repeating k^d * exp^d / d^d ln(1/delta) times
@@ -103,7 +104,7 @@ bool ViolatedMargin(PointSet points, HyperPlane &optimal_plane, int dimension,
 }
 
 
-PointSet Sampling(PointSet points, int dimension, double p)
+PointSet Sampling(PointSet &points, int dimension, double p)
 {
     //srand(time(NULL));   //in reality we should use time seed
     if (p > 1)
@@ -116,16 +117,23 @@ PointSet Sampling(PointSet points, int dimension, double p)
     for (int i = 0; i < n; i++)
     {
         double r = ((double)rand())/RAND_MAX;
+        //printf("%d %lf\n", i, r);
         if (r < p)
         {
-            newPoints.push_back(points[i]);
+            Point tmp = Point(dimension);
+            for (int j = 0; j < dimension; j++)
+            {
+                tmp.x[j] = points[i].x[j];
+            }
+            tmp.y = points[i].y;
+            newPoints.push_back(tmp);
         }
     }
     return newPoints;
 }
 
 
-bool MarginClasification(PointSet points, HyperPlane &plane, int dimension, double rho, int method)
+bool MarginClasification(PointSet &points, HyperPlane &plane, int dimension, double rho, int method)
 {
     if (method == 0)
     {

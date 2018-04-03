@@ -5,8 +5,12 @@
 
 using namespace std;
 
+//max iterations to find the two approximation diameter
 const int MaxIterTwoApprox = 1000;
 
+/*
+*   structure of the Bounding Box
+*/
 struct BoudingBox{
     double *U;
     double *L;
@@ -19,8 +23,23 @@ struct BoudingBox{
         this->d = d;
     }
 
+    ~BoudingBox()
+    {
+        if (U != NULL) {
+            delete []U;
+            U = NULL;
+        }
+        if (L != NULL) {
+            delete []L;
+            L = NULL;
+        }
+    }
+
 };
 
+/*
+*   structure of a key in hash table
+*/
 struct Key
 {
     int *x;
@@ -32,37 +51,57 @@ struct Key
         this->base = base;
         this->x = new int[d];
     }
+    ~Key()
+    {
+        if (x != NULL) {
+            delete []x;
+            x = NULL;
+        }
+    }
 };
 
+/*
+*   structure of a pair in hash table
+*/
 struct Pair{
-    int low_index; //the index of lowest point in current pillar
-    int high_index; //the index of highest point in current pillar
-    double low_value;
-    double high_value;
-    int *x;
+    int low_index;      //the index of lowest point in current pillar
+    int high_index;     //the index of highest point in current pillar
+    double low_value;   //the value of lowest point in current pillar
+    double high_value;  //the value of lowest point in current pillar
+    int *x;             //the coordinate of current pillar
     Pair(int d)
     {
         this->x = new int[d];
     }
+    ~Pair()
+    {
+        if (x != NULL) {
+            delete []x;
+            x = NULL;
+        }
+    }
 };
 
+/*
+*   structure to represent a point in one dimension
+*/
 struct OneDim{
     double x;
     int y;
-
     bool operator < (const OneDim & a) const
     {
         return this->x < a.x;
     }
-
 };
 
-
+/*
+*   hash table to find the lowest and highest points in a pillar
+*/
 struct HashTable{
     vector<Pair> table;
-    bool *Empty;
-    int M; //table size
-    int p; //divisor
+    bool *Empty;    //flag array
+    int M;          //table size
+    int p;          //divisor
     HashTable(int M, int p, int d) //using the division method
     {
         this->M = M;
@@ -76,6 +115,13 @@ struct HashTable{
             Empty[i] = true;
         }
     }
+    ~HashTable()
+    {
+        if (Empty != NULL) {
+            delete [] Empty;
+            Empty = NULL;
+        }
+    }
 
     int Hash_func(Key key)
     {
@@ -86,10 +132,10 @@ struct HashTable{
         return value;
     }
 
-    bool key_match(Pair cur_pair, Key key2)
+    bool key_match(Pair cur_pair, Key key)
     {
-        for (int i = 0; i < key2.d; i++) {
-            if (cur_pair.x[i] != key2.x[i]) return false;
+        for (int i = 0; i < key.d; i++) {
+            if (cur_pair.x[i] != key.x[i]) return false;
         }
         return true;
     }
@@ -105,21 +151,26 @@ struct HashTable{
     bool Insert(Point point, int d, int index, Key key)
     {
         int value = Hash_func(key);
-        if (index == 37458) {
-            printf(" %d ", value);
-            PrintKey(key);
-        }
-
         value = value - 1;
         int di = (value + 1) % M;
-        while(!Empty[di] && !key_match(table[di], key)) {
+        while(1) {
+            if (Empty[di]) {
+                break;
+            }
+            if (!Empty[di] && key_match(table[di], key)) {
+                break;
+            }
+            if (value == -1 && (di+1) == M) {
+                return false;
+            }
             if (di != value) {
                 di = (di + 1) % M;
             }else {
                 return false;
             }
         }
-        if (Empty[di]) {  //insert current point
+        //insert current point
+        if (Empty[di]) {
             //printf("Empty: index %d ", index);
             //PrintKey(key);
             Empty[di] = false;
@@ -132,8 +183,8 @@ struct HashTable{
             }
             return true;
         }
-
-        if (!Empty[di] && key_match(table[di], key)) {//find the slot and update
+        //find the slot and update
+        if (!Empty[di] && key_match(table[di], key)) {
             //printf("Update: index %d ", index);
             //PrintKey(key);
             if (point.x[d-1] > table[di].high_value) {
@@ -169,18 +220,53 @@ struct HashTable{
 };
 
 void PrintBoudingBox(BoudingBox box);
-void MinimumBoudingBox(PointSet points, int dimension);
 
+
+/*
+*   Compute the bounding box recursively
+*   Parameter List:
+*       points: points set
+*       curbox: current bounding box
+*       MainTainT: the accumulated transforming
+*       dimension: current dimension
+*       realDimension: the real dimension of points and bounding box
+*/
 bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **MainTainT, int dimension, int realDimension);
+
+/*
+*   Compute the two approximate diameter of a point set
+*   Parameter List:
+*       points: points set
+*       s: the index of a point
+*       t: the index of the other point, the other point lies one side of the plane
+*           whose normal vector is ts and point t is on the plane
+*/
 bool TwoApproxiDiameter(PointSet points, int dimension, int &s, int &t);
+
+/*
+*   compute a simple core set with size O(1/epsilon^d-1)
+*/
 PointSet SimpleCoreSet(PointSet points, double **MainTainT, int dimension, double epsilon);
 
+/*
+*   compute a smaller core set with size O(1/epsilon^(d-1)/2)
+*/
 PointSet SmallerCoreSet(PointSet points, PointSet directionPoints, int dimension, double epsilon);
 
-bool DirectionalWidth(PointSet points, HyperPlane &plane, int dimension, double epsilon);
+/*
+*   Compute a hyperplane with a (1-rho)approximation margin using Directional width algorithm
+*/
+bool DirectionalWidth(PointSet points, HyperPlane &plane, int dimension, double rho);
 
+/*
+*   Given a direction, compute a hyperplane with largest margin in one dimension
+*/
 bool OneDimensionClassification(PointSet points, HyperPlane &cur_plane, Point direction, double radius);
 
+/*
+*   recursively compute directions
+*   store them in points set
+*/
 void ComputingDirections(PointSet &points, double*angles, int curDimension, int realDimension, double delta, double radius);
 
 

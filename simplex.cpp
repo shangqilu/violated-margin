@@ -39,7 +39,7 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
         min_index = m + n;
         int leaving = m + n;
         for (int i = 0; i < m; i++) {
-            if (node.A[i][entering] > 0) {
+            if (node.A[i][entering] - 0 > ZERO) {
                 double tmp = node.b[i]/node.A[i][entering];
                 //printf("*** %d %lf\n", i, tmp);
                 if (max_delta > tmp) {
@@ -186,7 +186,7 @@ bool Initial_Simplex(Simplex_Node &node)
         min_index = m + n;
         int leaving = m + n;
         for (int i = 0; i < m; i++) {
-            if (node.A[i][entering] > 0) {
+            if (node.A[i][entering]-0 > ZERO) {
                 double tmp = node.b[i]/node.A[i][entering];
                 //printf("*** %d %lf\n", i, tmp);
                 if (max_delta > tmp) {
@@ -195,7 +195,7 @@ bool Initial_Simplex(Simplex_Node &node)
                     max_delta = tmp;
                     min_index = node.B[i];
                 }
-                if (fabs(max_delta - tmp)< 1e-6) {
+                if (fabs(max_delta - tmp)< ZERO) {
                     if(min_index > node.B[i]) {
                         leaving = i;
                         max_delta = tmp;
@@ -409,7 +409,7 @@ bool OneDirectionLPClassification(PointSet trainPoints, HyperPlane &plane, int d
         return false;
     }
     //printf("number of constraints: %d\n", number_constraints);
-    PrintLPresult(result, number_variables);
+    //PrintLPresult(result, number_variables);
     for (int j = 0; j < dimension; j++) {
         plane.w[j] = result.x[2*j]-result.x[2*j+1];
     }
@@ -431,7 +431,7 @@ bool LPclassification(PointSet trainPoints, HyperPlane &plane, int dimension)
             bool separable = MinimumSeparableDistance(trainPoints, cur_plane, cur_margin);
             if (!separable) {
                 printf("wrong in simplex, current dimension %d\n", j);
-                PrintHyperPlane(cur_plane, dimension);
+                //PrintHyperPlane(cur_plane, dimension);
                 flag = 0;
 
             }

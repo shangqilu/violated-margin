@@ -5,9 +5,10 @@ using namespace std;
 
 bool TwoApproxiDiameter(PointSet points, int dimension, int &s, int &t)
 {
-    //compute the 2-approximation diameter
     int n = points.size();
-    //srand(time(NULL));
+#ifndef __DEBUG__
+    srand(time(NULL));
+#endif // __DEBUG__
     int cnt = 0;
     while(1)
     {
@@ -30,6 +31,7 @@ bool TwoApproxiDiameter(PointSet points, int dimension, int &s, int &t)
         Point direction = PointMinus(points[s], points[t], dimension);
         Point axis = Point(dimension);
         axis.x[dimension-1] = 1;
+        //cout << s << " " << t << endl;
         //the hyper plane s and t defined is not parallel to last dimension coordinate axis
         if (fabs(Dot(direction, axis, dimension)) > ZERO)
         {
@@ -75,9 +77,10 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
         //puts("points are in the same coordinates in current dimension!!! ");
         //puts("data can be presented in lower dimension");
         //puts("choose d dimension axis as the normal vector");
-        Point axis = Point(dimension);
-        axis.x[dimension-1] = 1;
-        d_axis = PointMinus(axis, points[t], dimension);
+        //Point axis = Point(dimension);   //problem !!!
+        //axis.x[dimension-1] = 1;
+
+        d_axis.x[dimension-1] = 1;
 
     }
     else
@@ -152,7 +155,7 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
         bool solve = GaussianEquation(A, b, x, number_variables);
         if (!solve)
         {
-            //puts("the equation set is insouble!");
+            puts("the equation set is insouble!");
             break;
         }
 
@@ -218,55 +221,24 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
     curbox.U[dimension-1] = points[max_index].x[dimension-1];
     for (int i = 0; i < realDimension+1; i++)
     {
-        delete CurT[i];
-        delete Inverse_M[i];
+        delete []CurT[i];
+        delete []Inverse_M[i];
     }
     if (dimension > 1)
     {
         for (int i = 0; i < dimension-1; i++)
         {
-            delete A[i];
+            delete []A[i];
         }
-        delete A;
-        delete b;
-        delete x;
+        delete []A;
+        delete []b;
+        delete []x;
     }
-    delete CurT;
-    delete Inverse_M;
+    delete []CurT;
+    delete []Inverse_M;
     return RecursionMinimumBoudingBox(points, curbox, MainTainT, dimension-1, realDimension);
 }
 
-void MinimumBoudingBox(PointSet points, int dimension)
-{
-    double **MainTainT = new double*[dimension+1];
-    //store those d basis vectors
-    for (int i = 0; i < dimension+1; i++)
-    {
-        MainTainT[i] = new double[dimension+1];
-        for (int j = 0; j < dimension+1; j++)
-        {
-            MainTainT[i][j] = 0;
-        }
-    }
-    for (int i = 0; i < dimension + 1; i++)
-        MainTainT[i][i] = 1;
-
-    BoudingBox box = BoudingBox(dimension);
-    RecursionMinimumBoudingBox(points, box, MainTainT, dimension, dimension);
-    //PrintBoudingBox(box);
-
-    puts("the new points");
-    int n = points.size();
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j  < dimension; j++)
-        {
-            cout << points[i].x[j] << " ";
-        }
-        cout << endl;
-    }
-    //PrintMatrix(MainTainT, dimension+1);
-}
 
 
 void PrintBoudingBox(BoudingBox box)
@@ -349,8 +321,8 @@ PointSet SimpleCoreSet(PointSet points, double **MainTainT, int dimension, doubl
     //divided the box into pillars find the highest and lowest point in each pillar
     double C_d = 1.0/(dimension*(4*dimension+1)); //a parameter
     int M = ceil(4/(epsilon*C_d)); //number of intervals in each dimension
-    //printf("M: %d \n", M);
     int n = points.size();
+    //printf("M: %d n: %d\n", M, n);
     int prime = LargestPrimeBelow(1.5*n);
     HashTable table = HashTable(1.5*n, prime, dimension-1);
     Key key = Key(dimension-1, M);
@@ -372,10 +344,12 @@ PointSet SimpleCoreSet(PointSet points, double **MainTainT, int dimension, doubl
             //key = (key * M + cur_k) % prime;    //there is a problem with hash table!!!
         }
         //printf("Insert point %d\n", i);
-        table.Insert(points[i], dimension, i, key);
+        bool res = table.Insert(points[i], dimension, i, key);
+        if (!res) {
+            puts("there is something wrong with the hashtable");
+        }
     }
     vector<int> index_coreset = table.Travel();
-
     PointSet simpleSet;
     for (int i = 0; i < index_coreset.size(); i++)
     {
@@ -384,9 +358,9 @@ PointSet SimpleCoreSet(PointSet points, double **MainTainT, int dimension, doubl
 
     for (int i = 0; i < dimension + 1; i++)
     {
-        delete HypercubeM[i];
+        delete []HypercubeM[i];
     }
-    delete HypercubeM;
+    delete []HypercubeM;
 
     return simpleSet;
 }
@@ -451,17 +425,17 @@ PointSet SmallerCoreSet(PointSet points, PointSet directionPoints, int dimension
 
     for (int i = 0; i < dimension + 1; i++)
     {
-        delete MainTainT[i];
-        delete InverseT[i];
+        delete []MainTainT[i];
+        delete []InverseT[i];
     }
-    delete MainTainT;
-    delete InverseT;
+    delete []MainTainT;
+    delete []InverseT;
 
     return smallerSet;
 }
 
 
-bool DirectionalWidth(PointSet points, HyperPlane &optimal_plane, int dimension, double epsilon)
+bool DirectionalWidth(PointSet points, HyperPlane &optimal_plane, int dimension, double rho)
 {
     //puts("separating positive points and negative points");
     //find +1 points and -1 points
@@ -495,7 +469,7 @@ bool DirectionalWidth(PointSet points, HyperPlane &optimal_plane, int dimension,
     //compute those directions set the angle with epsilon
     //compute direction set for constructing CoreSet
     double alpha = 1.0/(dimension*(4*dimension+1));
-    double delta = sqrt(epsilon*alpha/4);
+    double delta = sqrt(rho*alpha/4);
     double radius = sqrt(dimension) + 1;
 
 
@@ -503,28 +477,20 @@ bool DirectionalWidth(PointSet points, HyperPlane &optimal_plane, int dimension,
     PointSet directionPoints;
     //puts("computing directions...");
     ComputingDirections(directionPoints, angles, 1, dimension, delta, radius);
-    //puts("computing coreSet...");
-    //compute the epsilon-core set respectively according to those directions
-    //printf("the positive set size: %d\n", positivePoints.size());
-    //printf("the negative set size: %d\n", negativePoints.size());
-    PointSet positiveCoreSet = SmallerCoreSet(positivePoints, directionPoints, dimension, epsilon);
-    PointSet negativeCoreSet = SmallerCoreSet(negativePoints, directionPoints, dimension, epsilon);
-
-    //printf("the positive coreset size: %d\n", positiveCoreSet.size());
-    //printf("the negative coreset size: %d\n", negativeCoreSet.size());
-
-
+    //puts("computing core set...");
+    PointSet positiveCoreSet = SmallerCoreSet(positivePoints, directionPoints, dimension, rho);
+    PointSet negativeCoreSet = SmallerCoreSet(negativePoints, directionPoints, dimension, rho);
+    
     //merge the two core set
     positiveCoreSet.insert(positiveCoreSet.end(), negativeCoreSet.begin(), negativeCoreSet.end());
-    //cout << "The CoreSet size...";
-    //cout << positiveCoreSet.size() << endl;
-    //PrintPoints(positiveCoreSet, dimension);
+
     //compute a hyperplane along each direction
     //actually the angle of core set and classification may be different !!!!!
     //a different direction points the angle is epsilon
     radius = 1;
     directionPoints.clear();
-    ComputingDirections(directionPoints, angles, 1, dimension, epsilon, radius);
+    //puts("computing directions again...");
+    ComputingDirections(directionPoints, angles, 1, dimension, rho, radius);
     //printf("there are %d direction points\n", directionPoints.size());
     double max_margin = 0;
     //
@@ -535,7 +501,6 @@ bool DirectionalWidth(PointSet points, HyperPlane &optimal_plane, int dimension,
         //compute the margin of current plane
         if (found)
         {
-
             //puts("separable on those coreset points");
             //PrintHyperPlane(cur_plane, dimension);
             //check each hyperplane direction with the original data
@@ -550,12 +515,12 @@ bool DirectionalWidth(PointSet points, HyperPlane &optimal_plane, int dimension,
         }
     }
 
-    delete angles;
+    delete []angles;
     //return the largest margin hyperplane
-    if (max_margin > 0)
+    if (max_margin > ZERO)
     {
         PrintHyperPlane(optimal_plane, dimension);
-        cout << max_margin << endl;
+        //cout << max_margin << endl;
         puts("find an solution along those directions");
         return true;
     }
@@ -629,28 +594,23 @@ bool OneDimensionClassification(PointSet points, HyperPlane &cur_plane, Point di
 
         }
     }
-
+    delete []prefix_sum_positive;
+    delete []suffix_sum_negative;
+    delete []one_pts;
 
     if (!separable)
     {
-        delete prefix_sum_positive;
-        delete suffix_sum_negative;
-        delete one_pts;
         return false;
     }
-
     int dimension = cur_plane.d;
     double sum = 0;
     for (int j = 0; j < dimension; j++)
     {
         cur_plane.w[j] = direction.x[j]/radius;
-
-        sum = sum - line*(direction.x[j]/radius)*(direction.x[j]/radius);
+        sum = sum - line*(direction.x[j]/radius) * cur_plane.w[j];
     }
     cur_plane.b = sum;
-    delete prefix_sum_positive;
-    delete suffix_sum_negative;
-    delete one_pts;
+
     return separable;
 
 }

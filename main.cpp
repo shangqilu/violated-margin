@@ -9,7 +9,7 @@ using namespace std;
 
 int main(int nargs, char **args)
 {
-
+    
     if (nargs != 2 || !isdigit(args[1][0])) {
         puts("input: executing_name method_number");
         puts("there are three methods");
@@ -20,8 +20,12 @@ int main(int nargs, char **args)
     }
 
     int method = args[1][0] - '0';
-    //cout << method << endl;
+    cout << method << endl;
     TestViolatedMargin(method);
-
+    
+    
+    
+    //TestSampling();
+    //TestSimplex();
     return 0;
 }

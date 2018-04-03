@@ -3,6 +3,7 @@
 using namespace std;
 
 
+
 PointSet LoadData(char* filename, char* label_filename, int dimension)
 {
     PointSet trainPointSet;
@@ -48,6 +49,7 @@ PointSet LoadDataLibSVMFormat(char* filename, int dimension)
         puts("cannot open file!");
         return points;
     }
+    int cnt = 0;
     while(!feof(fp)) {
         Point cur_pt = Point(dimension);
         int label;
@@ -67,13 +69,16 @@ PointSet LoadDataLibSVMFormat(char* filename, int dimension)
             if (isdigit(c)) {
                 ungetc(c,fp);
                 fscanf(fp, "%d:%lf", &i, &content);
-                //cout << i << " " << content << endl;
+                //cout << i << " " << content << " " << cnt << endl;
                 cur_pt.x[i-1] = content;
             }
         }
         points.push_back(cur_pt);
+        cnt ++ ;
     }
+    return points;
 }
+
 PointSet CopyPoints(PointSet points, int dimension)
 {
     int n = points.size();
@@ -303,9 +308,9 @@ bool GaussianEquation(double** A, double* b, double* x, int n)
     }
     for (int i=0; i<n; i++)
     {
-        delete M[i];
+        delete []M[i];
     }
-    delete M;
+    delete []M;
     return true;
 }
 
@@ -347,11 +352,11 @@ bool GaussianInverseMatrix(double** A, double**B, int n)
             //singular matrix
             for (int i = 0; i < n; i++)
             {
-                delete Matrix[i];
-                delete Inverse[i];
+                delete []Matrix[i];
+                delete []Inverse[i];
             }
-            delete Matrix;
-            delete Inverse;
+            delete []Matrix;
+            delete []Inverse;
             return false;
         }
         if (maxLineIndex != i)
@@ -405,11 +410,11 @@ bool GaussianInverseMatrix(double** A, double**B, int n)
     //delete memory
     for (int i = 0; i < n; i++)
     {
-        delete Matrix[i];
-        delete Inverse[i];
+        delete []Matrix[i];
+        delete []Inverse[i];
     }
-    delete Matrix;
-    delete Inverse;
+    delete []Matrix;
+    delete []Inverse;
     return true;
 }
 
@@ -464,7 +469,7 @@ void TransformingPoints(PointSet &points, double **T, int point_dimension)
             points[i].x[j] = x[j];
         }
     }
-    delete x;
+    delete []x;
 }
 
 void MatrixMultiply(double **A, double **B, double **C, int dimension)
@@ -495,9 +500,9 @@ void MatrixMultiply(double **A, double **B, double **C, int dimension)
     }
     for (int i = 0; i < dimension; i++)
     {
-        delete T[i];
+        delete []T[i];
     }
-    delete T;
+    delete []T;
 }
 
 
