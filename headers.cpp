@@ -36,7 +36,7 @@ PointSet LoadData(char* filename, char* label_filename, int dimension)
         index++;
     }
     printf("Loading %d training examples.\n", index);
-
+	f_label.close();
     return trainPointSet;
 }
 
@@ -45,7 +45,7 @@ PointSet LoadDataLibSVMFormat(char* filename, int dimension)
 {
     PointSet points;
     FILE *fp = fopen(filename, "r");
-    if (!fp) {
+    if (fp == NULL) {
         puts("cannot open file!");
         return points;
     }
@@ -76,6 +76,7 @@ PointSet LoadDataLibSVMFormat(char* filename, int dimension)
         points.push_back(cur_pt);
         cnt ++ ;
     }
+	fclose(0);
     return points;
 }
 
@@ -124,6 +125,16 @@ double Dot(Point pt1, Point pt2, int dimension)
         sum += pt1.x[i]*pt2.x[i];
     }
     return sum;
+}
+
+double Dot(vector<double> x, vector<double> y, int dimension)
+{
+	double sum = 0;
+	for (int i = 0; i < dimension; i++)
+	{
+		sum += x[i] * y[i];
+	}
+	return sum;
 }
 
 Point PointMinus(Point pt1, Point pt2, int dimension)
@@ -183,7 +194,7 @@ bool MinimumSeparableDistance(PointSet points, HyperPlane plane, double &min_dis
     double min_margin = MAX_DOUBLE;
     for (int i = 0; i < n; i++)
     {
-        if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < ZERO)
+        if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < ERROR)
         {
             return false;
         }
@@ -192,7 +203,7 @@ bool MinimumSeparableDistance(PointSet points, HyperPlane plane, double &min_dis
             min_margin = cur_dis;
         }
     }
-    if (fabs(min_margin - MAX_DOUBLE) < ZERO) {
+    if (fabs(min_margin - MAX_DOUBLE) < ERROR) {
         return false;
     } else {
         min_dis = min_margin;
@@ -211,7 +222,7 @@ bool MinimumViolatedDistance(PointSet points, HyperPlane plane, double &min_dis,
     int wrong_num = 0;
     for (int i = 0; i < n; i++)
     {
-        if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < ZERO)
+        if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < ERROR)
         {
             wrong_num ++;
         }else {
@@ -226,7 +237,7 @@ bool MinimumViolatedDistance(PointSet points, HyperPlane plane, double &min_dis,
         printf("wrong numbers : %d\n", wrong_num);
         return false;
     }
-    if (fabs(min_margin - MAX_DOUBLE) < ZERO) {
+    if (fabs(min_margin - MAX_DOUBLE) < ERROR) {
         return false;
     } else {
         min_dis = min_margin;
@@ -264,7 +275,7 @@ bool GaussianEquation(double** A, double* b, double* x, int n)
                 maxLineIndex = j;
             }
         }
-        if(fabs(colMax) < ZERO)
+        if(fabs(colMax) < ERROR)
         {
             puts("There is no solution to the equation set");
             //singular matrix
@@ -346,7 +357,7 @@ bool GaussianInverseMatrix(double** A, double**B, int n)
                 maxLineIndex = j;
             }
         }
-        if(fabs(colMax) < ZERO)
+        if(fabs(colMax) < ERROR)
         {
             //puts("There is no solution to the inverse matrix");
             //singular matrix
@@ -509,8 +520,8 @@ void MatrixMultiply(double **A, double **B, double **C, int dimension)
 int LargestPrimeBelow(int m)
 {
     if (m < 2) {
-        puts("there is no prime under m");
-        return 0;
+        printf("there is no prime under %d", m);
+        return 2;
     }
     int cur = m;
     while(cur --)

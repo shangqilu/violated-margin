@@ -5,7 +5,7 @@ using namespace std;
 
 
 
-void SimplePerceptron(PointSet trainPoints, int dimension)
+void SimplePerceptron(PointSet &trainPoints, int dimension)
 {
     int n = trainPoints.size();
     HyperPlane plane = HyperPlane(dimension);
@@ -36,7 +36,7 @@ void SimplePerceptron(PointSet trainPoints, int dimension)
     else PrintHyperPlane(plane, dimension);
 }
 
-bool MarginPerceptron(PointSet trainPoints, HyperPlane &plane, int dimension, double y_guess, double R, double epsilon)
+bool MarginPerceptron(PointSet &trainPoints, HyperPlane &plane, int dimension, double y_guess, double R, double epsilon)
 {
     int n = trainPoints.size();
     int iter_cnt = 0;
@@ -45,12 +45,8 @@ bool MarginPerceptron(PointSet trainPoints, HyperPlane &plane, int dimension, do
     //cout << "R: " << R << " y_guess: " << y_guess << endl;
     for (iter_cnt = 0; iter_cnt < maxIters; iter_cnt++)
     {
-        /*
-        if (iter_cnt % 500 == 0)
-        {
-            printf("Iteration %d\n", iter_cnt);
-        }
-        */
+        
+        //cout << iter_cnt << endl;
         int i;
         for(i = 0; i < n; i++)
         {
@@ -78,13 +74,13 @@ bool MarginPerceptron(PointSet trainPoints, HyperPlane &plane, int dimension, do
     }
 }
 
-bool IncreMarginPerceptron(PointSet trainPoints, HyperPlane &plane, int dimension, double rho)
+bool IncreMarginPerceptron(PointSet &trainPoints, HyperPlane &plane, int dimension, double rho)
 {
 
     //find the max distance between the points and the origin
     double maxDistantce = 0, minDistance = MAX_DOUBLE;
     int n = trainPoints.size();
-
+    PrintPoints(trainPoints, dimension);
     double epsilon = 1 - sqrt(1 - rho);   //parameter in margin perceptron
     Point origin = Point(dimension);
     for (int i = 0; i < n; i++) {
@@ -95,12 +91,14 @@ bool IncreMarginPerceptron(PointSet trainPoints, HyperPlane &plane, int dimensio
     cout << "Min: " << minDistance << "  Max: " << maxDistantce << endl;
     double y_guess = maxDistantce;
     while(true) {
+        cout << y_guess << endl;
         plane.Clear();
         bool re = MarginPerceptron(trainPoints, plane, dimension, y_guess, maxDistantce, epsilon);
         if (re) {
             break;
         } else{
             y_guess = (1-epsilon)*y_guess;
+            //cout << y_guess << endl;
         }
         if(y_guess < 0.1 ) {////need to consider carefully
             puts("It is non-linear separable!");

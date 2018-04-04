@@ -19,6 +19,8 @@ void TestSimplex()
     bool found = LPclassification(train_points, plane, dimension);
     if (found) {
         puts("find a solution");
+    } else {
+        puts("no solution");
     }
     int n = train_points.size();
     double cur_distance = 0;
@@ -54,7 +56,14 @@ void TestSimplex2()
     double input_C[2] = {2,-1};
     
     LPresult result = Simplex(input_A, input_B, input_C, 2, 2);
-    PrintLPresult(result, 2);
+    if (result.flag == 1) {
+        puts("find a solution");
+        PrintLPresult(result, 2);
+        puts("***");
+    } else {
+        puts("no solution");
+    }
+    //
 }
 
 void TestPerceptron()
@@ -67,12 +76,15 @@ void TestPerceptron()
     */
     //test for Margin Perceptron
     //SimplePerceptron(train_points, dimension);
-
-    char filename[] = "data/iris_4.txt";
-    int dimension = 4;
+    
+    char filename[] = "data/twoSamePts_2.txt";
+    int dimension = 2;
     PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
-
+    //SimplePerceptron(train_points, dimension);
+    
     HyperPlane plane = HyperPlane(dimension);
+    //bool found = MarginPerceptron(train_points, plane, dimension, 0.1, 3, 0.3);
+    
     bool found = IncreMarginPerceptron(train_points, plane, dimension, 0.3);
     if(found) {
         puts("find a solution");
@@ -85,7 +97,7 @@ void TestPerceptron()
     }else {
         puts("there is no solution");
     }
-
+    
 }
 
 void TestGaussianEquation()
@@ -228,24 +240,31 @@ void TestSmallerCoreSetandComputingDirection()
 
     double *angles = new double[dimension-1];
     PointSet directionPoints;
+	//169 directions
     ComputingDirections(directionPoints, angles, 1, dimension, delta, radius);
     printf("there are %d points in all directions\n", directionPoints.size());
     //PrintPoints(directionPoints, dimension);
 
     PointSet smallerSet = SmallerCoreSet(points, directionPoints, dimension, epsilon);
     puts("after transform");
-    PrintPoints(smallerSet, dimension);
+    //PrintPoints(smallerSet, dimension);
     delete []angles;
 }
 
 void TestComputingDirections()
 {
     PointSet directionPoints;
-    int dimension = 4;
+    int dimension = 3;
+
+	double epsilon = 0.1;
+	double alpha = 1.0 / (dimension*(4 * dimension + 1));
+	double delta = sqrt(epsilon*alpha / 4);
+	double radius = sqrt(dimension) + 1;
+
     double *angles = new double[dimension];
-    double epsilon = 0.1;
-    ComputingDirections(directionPoints, angles, 1, dimension, epsilon, 1);
-    printf("there are %d directions\n", directionPoints.size());
+    //double epsilon = 0.1;
+	ComputingDirections(directionPoints, angles, 1, dimension, delta, radius);
+	printf("there are %d points in all directions\n", directionPoints.size());
     delete []angles;
 }
 
@@ -300,28 +319,27 @@ void TestOneDimensionClassification()
 
 void TestDirectionalWidth()
 {
-    /*
+    
     char train_data[] = "data/separable_test_2/titanic_train_data.asc";
     char train_label[] = "data/separable_test_2/titanic_train_label.asc";
     int dimension = 2;
-    char train_data[] = "data/titanic_3/titanic_train_data.asc";
-    char train_label[] = "data/titanic_3/titanic_train_label.asc";
-    int dimension = 3;
-    */
-    //PointSet points = LoadData(train_data, train_label, dimension);
+	double epsilon = 0.1;
+	PointSet points = LoadData(train_data, train_label, dimension);
+	/*
+    //
 
-    double epsilon = 0.1;
+    
 
     char filename[] = "data/iris_4.txt";
     int dimension = 4;
     PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
-
+	*/
     HyperPlane plane = HyperPlane(dimension);
-    bool found = DirectionalWidth(train_points, plane, dimension, epsilon);
+	bool found = DirectionalWidth(points, plane, dimension, epsilon);
     if(found) {
         puts("find a solution");
         double cur_distance = 0;
-        bool separable = MinimumSeparableDistance(train_points, plane, cur_distance);
+		bool separable = MinimumSeparableDistance(points, plane, cur_distance);
         if (separable) {
             PrintHyperPlane(plane, plane.d);
             cout << "cur_dis: " << cur_distance << endl;
@@ -341,7 +359,7 @@ void TestViolatedMargin(int method)
     int dimension = 3;
     PointSet trainPoints = LoadDataLibSVMFormat(filename, dimension);
     HyperPlane plane = HyperPlane(dimension);
-    int k = trainPoints.size() * 0.06;
+    int k = trainPoints.size() * 0.08;
     double epsilon = 0.1;
     double rho = 0.1;
     double delta = 0.5;

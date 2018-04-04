@@ -120,13 +120,7 @@ PointSet Sampling(PointSet &points, int dimension, double p)
         //printf("%d %lf\n", i, r);
         if (r < p)
         {
-            Point tmp = Point(dimension);
-            for (int j = 0; j < dimension; j++)
-            {
-                tmp.x[j] = points[i].x[j];
-            }
-            tmp.y = points[i].y;
-            newPoints.push_back(tmp);
+            newPoints.push_back(points[i]);
         }
     }
     return newPoints;

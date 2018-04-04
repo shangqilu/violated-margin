@@ -12,29 +12,16 @@ const int MaxIterTwoApprox = 1000;
 *   structure of the Bounding Box
 */
 struct BoudingBox{
-    double *U;
-    double *L;
+    vector<double> U;
+    vector<double> L;
     int d;
 
     BoudingBox(int d)
     {
-        this->U = new double[d];
-        this->L = new double[d];
+        this->U.resize(d);
+        this->L.resize(d);
         this->d = d;
     }
-
-    ~BoudingBox()
-    {
-        if (U != NULL) {
-            delete []U;
-            U = NULL;
-        }
-        if (L != NULL) {
-            delete []L;
-            L = NULL;
-        }
-    }
-
 };
 
 /*
@@ -42,21 +29,14 @@ struct BoudingBox{
 */
 struct Key
 {
-    int *x;
+    vector<int> x;
     int d;
     int base;
     Key(int d, int base)
     {
         this->d = d;
         this->base = base;
-        this->x = new int[d];
-    }
-    ~Key()
-    {
-        if (x != NULL) {
-            delete []x;
-            x = NULL;
-        }
+        this->x.resize(d);
     }
 };
 
@@ -68,17 +48,10 @@ struct Pair{
     int high_index;     //the index of highest point in current pillar
     double low_value;   //the value of lowest point in current pillar
     double high_value;  //the value of lowest point in current pillar
-    int *x;             //the coordinate of current pillar
+    vector<int> x;             //the coordinate of current pillar
     Pair(int d)
     {
-        this->x = new int[d];
-    }
-    ~Pair()
-    {
-        if (x != NULL) {
-            delete []x;
-            x = NULL;
-        }
+        this->x.resize(d);
     }
 };
 
@@ -99,7 +72,7 @@ struct OneDim{
 */
 struct HashTable{
     vector<Pair> table;
-    bool *Empty;    //flag array
+    vector<bool> Empty;    //flag array
     int M;          //table size
     int p;          //divisor
     HashTable(int M, int p, int d) //using the division method
@@ -110,16 +83,9 @@ struct HashTable{
             Pair newpair = Pair(d);
             table.push_back(newpair);
         }
-        Empty = new bool[M];
+        Empty.resize(M);
         for (int i = 0; i < M; i++) {
             Empty[i] = true;
-        }
-    }
-    ~HashTable()
-    {
-        if (Empty != NULL) {
-            delete [] Empty;
-            Empty = NULL;
         }
     }
 
@@ -148,7 +114,7 @@ struct HashTable{
         cout << key.x[key.d-1];
         cout << ")" << endl;
     }
-    bool Insert(Point point, int d, int index, Key key)
+    bool Insert(Point &point, int d, int index, Key key)
     {
         int value = Hash_func(key);
         value = value - 1;
@@ -197,6 +163,7 @@ struct HashTable{
             }
             return true;
         }
+		return false;
     }
 
     vector<int> Travel() //report all the points in hash table
@@ -241,27 +208,27 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
 *       t: the index of the other point, the other point lies one side of the plane
 *           whose normal vector is ts and point t is on the plane
 */
-bool TwoApproxiDiameter(PointSet points, int dimension, int &s, int &t);
+bool TwoApproxiDiameter(PointSet &points, int dimension, int &s, int &t);
 
 /*
 *   compute a simple core set with size O(1/epsilon^d-1)
 */
-PointSet SimpleCoreSet(PointSet points, double **MainTainT, int dimension, double epsilon);
+PointSet SimpleCoreSet(PointSet &points, double **MainTainT, int dimension, double epsilon);
 
 /*
 *   compute a smaller core set with size O(1/epsilon^(d-1)/2)
 */
-PointSet SmallerCoreSet(PointSet points, PointSet directionPoints, int dimension, double epsilon);
+PointSet SmallerCoreSet(PointSet &points, PointSet directionPoints, int dimension, double epsilon);
 
 /*
 *   Compute a hyperplane with a (1-rho)approximation margin using Directional width algorithm
 */
-bool DirectionalWidth(PointSet points, HyperPlane &plane, int dimension, double rho);
+bool DirectionalWidth(PointSet &points, HyperPlane &plane, int dimension, double rho);
 
 /*
 *   Given a direction, compute a hyperplane with largest margin in one dimension
 */
-bool OneDimensionClassification(PointSet points, HyperPlane &cur_plane, Point direction, double radius);
+bool OneDimensionClassification(PointSet &points, HyperPlane &cur_plane, Point direction, double radius);
 
 /*
 *   recursively compute directions

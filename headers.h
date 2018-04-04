@@ -22,34 +22,29 @@
 #define DEBUG(format,...)
 #endif
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 using namespace std;
 
 const double MAX_DOUBLE = 1e300;
-const double ZERO = 1e-10;
+const double ZERO = 0;
+const double ERROR = 1e-7;
 
 /*
 *   the structure of a hyperplane
 */
 struct HyperPlane
 {
-    double *w;  //weights
+	vector<double> w;  //weights
     double b;   //bias
     int d;      //dimension
     HyperPlane(int d)
     {
-        this->w = new double[d];
-        for (int i = 0; i < d; i++)
-            this->w[i] = 0;
+        this->w.resize(d);
         this->b = 0;
         this->d = d;
-    }
-    ~HyperPlane()
-    {
-        if (w != NULL) {
-            delete []w;
-            w = NULL;
-        }
     }
     void Clear()
     {
@@ -64,30 +59,21 @@ struct HyperPlane
 */
 struct Point
 {
-    double *x;  //x coordinates
+    vector<double> x;  //x coordinates
     int y;      //label
     Point(int d)
     {
-        this->x = new double[d];
-        for (int i = 0; i < d; i++)
-            this->x[i] = 0;
+        this->x.resize(d);
         this->y = 0;
     }
     Point(int d, double *x, int y)
     {
-        this->x = new double[d];
+		this->x.resize(d);
         for (int i = 0; i < d; i++)
             this->x[i] = x[i];
         this->y = y;
     }
-    /*
-    ~Point()
-    {
-        if (x != NULL) {
-            delete []x;
-        }
-    }
-    */
+    
 };
 
 /*
@@ -125,6 +111,10 @@ double Dot(double* w, double *x, int dimension);
 */
 double Dot(Point pt1, Point pt2, int dimension);
 
+/*
+*   compute the dot product of two vectors
+*/
+double Dot(vector<double> x, vector<double> y, int dimension);
 /*
 *   compute the vector of p1-p2
 */

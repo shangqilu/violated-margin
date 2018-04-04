@@ -11,12 +11,12 @@ using namespace std;
 *   subject to Ax <= b
 */
 struct Simplex_Node{
-    double **A; //store the linear program in standard form
-    double *b;  //Ax <= b
-    double *C;  //the objective function vector
+    vector<vector<double> > A; //store the linear program in standard form
+	vector<double> b;  //Ax <= b
+	vector<double> C;  //the objective function vector
 
-    int *N;     //non-basic variables
-    int *B;     //basic variables
+	vector<int> N;     //non-basic variables
+	vector<int> B;     //basic variables
 
     int m;      // number of constraints
     int n;      // number of features
@@ -24,14 +24,13 @@ struct Simplex_Node{
 
     Simplex_Node(double **input_A, double *input_b, double *input_C, int m, int n)
     {
-        this->A = new double*[m];
-        for (int i = 0; i < m; i++) {
-            this->A[i] = new double[n+1];
-        }
-        this->b = new double[m];
-        this->C = new double[n+1];
-        this->N = new int[n+1];
-        this->B = new int[m];
+		this->A.resize(m);
+		for (int i = 0; i < m; i++) this->A[i].resize(n + 1);
+        
+        this->b.resize(m);
+		this->C.resize(n+1);
+        this->N.resize(n+1);
+        this->B.resize(m);
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
@@ -49,58 +48,21 @@ struct Simplex_Node{
         this->n = n;
     }
     
-    ~Simplex_Node()
-    {
-        if (A != NULL) {
-            for (int i = 0; i < m; i++)
-            {
-                delete []A[i];
-            }
-            delete []A;
-            A = NULL;
-        }
-        if (b != NULL) {
-            delete []b;
-            b = NULL;
-        }
-        if (C != NULL) {
-            delete []C;
-            C = NULL;
-        }
-        if (N != NULL) {
-            delete []N;
-            N = NULL;
-        }
-        if (B != NULL) {
-            delete []B;
-            B = NULL;
-        }
-    }
-    
 };
 
 /*
 *   a structure to store the result of simplex algorithm
 */
 struct LPresult{
-    double *x;      //the solution to a LP
+    vector<double> x;      //the solution to a LP
     int flag;       //flag = 1 find an optimal solution
                     //flag = 0 infeasible or unbounded
     double value;   //optimal objective function value
     LPresult(int d)
     {
-        this->x = new double[d];
-        for (int i = 0; i < d; i++) this->x[i] = 0;
+        this->x.resize(d);
         this->flag = 0;
         this->value = 0;
-    }
-
-    ~LPresult()
-    {
-        if (x != NULL) {
-            delete []x;
-            x = NULL;
-        }
     }
 };
 
@@ -122,17 +84,17 @@ void Pivot(Simplex_Node &node, int leaving, int entering);
 */
 bool Initial_Simplex(Simplex_Node &node);
 
-void PrintLPresult(LPresult result, int dimension);
-void PrintSimplexNode(Simplex_Node node);
+void PrintLPresult(LPresult &result, int dimension);
+void PrintSimplexNode(Simplex_Node &node);
 
 /*
 *   find the hyperplane with largest gap
 *   along the direction of the i th dimension coordinate axis
 */
-bool OneDirectionLPClassification(PointSet trainPoints, HyperPlane &plane, int dimension, int direction);
+bool OneDirectionLPClassification(PointSet &trainPoints, HyperPlane &plane, int dimension, int direction);
 
 /*
 *   compute the 1/sqrt(dimension)-approximation hyperplane through liner programming
 */
-bool LPclassification(PointSet trainPoints, HyperPlane &plane, int dimension);
+bool LPclassification(PointSet &trainPoints, HyperPlane &plane, int dimension);
 #endif // __SIMPLEX_H__

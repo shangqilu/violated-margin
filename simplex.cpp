@@ -8,7 +8,7 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
     LPresult result = LPresult(n);
     bool re = Initial_Simplex(node);
     if (!re) {
-        //puts("It is infeasible!");
+        //puts("It is infeasible in initial simplex!");
         return result;
     }
 
@@ -48,7 +48,7 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
                     max_delta = tmp;
                     min_index = node.B[i];
                 }
-                if (fabs(max_delta - tmp)< ZERO) {
+                if (fabs(max_delta - tmp)< ERROR) {
                     if(min_index > node.B[i]) {
                         leaving = i;
                         max_delta = tmp;
@@ -103,13 +103,17 @@ void Pivot(Simplex_Node &node, int leaving, int entering)
         }
     }
     //compute the objective function
-    node.v += node.C[entering]*node.b[leaving];
+    tmp = node.C[entering]*node.b[leaving];
+    node.v += tmp;
     for (int j = 0; j < node.n; j++) {
         if (j != entering) {
-            node.C[j] -= node.C[entering]*node.A[leaving][j];
+            double tmp = node.C[entering]*node.A[leaving][j];
+            node.C[j] -= tmp;
+            //cout << tmp << " " << node.C[j] << endl;
         }
     }
-    node.C[entering] = -node.C[entering]*node.A[leaving][entering];
+    tmp = node.C[entering]*node.A[leaving][entering];
+    node.C[entering] = - tmp;
     //compute the new basic variables
     int tmp_entering_index = node.N[entering];
     node.N[entering] = node.B[leaving];
@@ -156,7 +160,7 @@ bool Initial_Simplex(Simplex_Node &node)
     //PrintSimplexNode(node);
     int leaving = k;
     Pivot(node, leaving, n-1);
-
+    //PrintSimplexNode(node);
     //L_aux find the optimal solution of L_aux
     int flag = 0;
     while(1){
@@ -179,6 +183,7 @@ bool Initial_Simplex(Simplex_Node &node)
         if(entering == n + m) {
             //end computing with an optimal solution
             //puts("find the optimal value in Initial-simplex");
+            //PrintSimplexNode(node);
             flag = 1;
             break;
         }
@@ -195,7 +200,7 @@ bool Initial_Simplex(Simplex_Node &node)
                     max_delta = tmp;
                     min_index = node.B[i];
                 }
-                if (fabs(max_delta - tmp)< ZERO) {
+                if (fabs(max_delta - tmp)< ERROR) {
                     if(min_index > node.B[i]) {
                         leaving = i;
                         max_delta = tmp;
@@ -214,9 +219,11 @@ bool Initial_Simplex(Simplex_Node &node)
         }
 
     }
-    if (!flag || fabs(node.v - 0) > ZERO) {
+    if (!flag || fabs(node.v - 0) > ERROR) {
+        //cout << flag << " " << node.v << endl;
         //puts("infeasible!");
-        delete back_c;
+        delete []back_c;
+
         return false;
     }
     //if x_n is a basic variable, we should do a pivot
@@ -274,7 +281,7 @@ bool Initial_Simplex(Simplex_Node &node)
     return true;
 }
 
-void PrintLPresult(LPresult result, int dimension)
+void PrintLPresult(LPresult &result, int dimension)
 {
     printf("objective value: %lf\n", result.value);
     printf("X: ");
@@ -285,7 +292,7 @@ void PrintLPresult(LPresult result, int dimension)
     cout << endl;
 }
 
-void PrintSimplexNode(Simplex_Node node)
+void PrintSimplexNode(Simplex_Node &node)
 {
     int m = node.m;
     int n = node.n;
@@ -316,12 +323,13 @@ void PrintSimplexNode(Simplex_Node node)
         printf("%d ", node.N[j]);
     }
     cout << endl;
-    printf("Cur objecrive value %lf\n", node.v);
+    printf("Cur objecrive value :");
+    cout << node.v << endl;
 }
 
 //the direction range from 1 to d means d directions along the axes
 //if direction = 0, there are no direction constraints
-bool OneDirectionLPClassification(PointSet trainPoints, HyperPlane &plane, int dimension, int direction)
+bool OneDirectionLPClassification(PointSet &trainPoints, HyperPlane &plane, int dimension, int direction)
 {
     int number_constraints, number_variables;
     number_variables = 2*(dimension+1)+1;
@@ -418,7 +426,7 @@ bool OneDirectionLPClassification(PointSet trainPoints, HyperPlane &plane, int d
 }
 
 
-bool LPclassification(PointSet trainPoints, HyperPlane &plane, int dimension)
+bool LPclassification(PointSet &trainPoints, HyperPlane &plane, int dimension)
 {
     HyperPlane cur_plane = HyperPlane(dimension);
     double max_margin = 0;
@@ -430,7 +438,8 @@ bool LPclassification(PointSet trainPoints, HyperPlane &plane, int dimension)
             double cur_margin = 0;
             bool separable = MinimumSeparableDistance(trainPoints, cur_plane, cur_margin);
             if (!separable) {
-                printf("wrong in simplex, current dimension %d\n", j);
+                //printf("wrong in simplex, current dimension %d\n", j);
+                //minimumseparabledistance has a more serious condition to check whether its separable.
                 //PrintHyperPlane(cur_plane, dimension);
                 flag = 0;
 
