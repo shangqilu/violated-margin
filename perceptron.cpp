@@ -8,7 +8,7 @@ using namespace std;
 void SimplePerceptron(PointSet &trainPoints, int dimension)
 {
     int n = trainPoints.size();
-    HyperPlane plane = HyperPlane(dimension);
+    HyperPlane plane(dimension);
     int iter_cnt = 0;
     for (iter_cnt = 0; iter_cnt < MaxIterations; iter_cnt++)
     {

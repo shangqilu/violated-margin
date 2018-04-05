@@ -10,60 +10,117 @@ using namespace std;
 *   the objective function is to maximize C*x
 *   subject to Ax <= b
 */
-struct Simplex_Node{
-    vector<vector<double> > A; //store the linear program in standard form
-	vector<double> b;  //Ax <= b
-	vector<double> C;  //the objective function vector
+class Simplex_Node{
+public:
+	double **A; //store the linear program in standard form
+	double *b;  //Ax <= b
+	double *C;  //the objective function vector
 
-	vector<int> N;     //non-basic variables
-	vector<int> B;     //basic variables
+	int *N;     //non-basic variables
+	int *B;     //basic variables
 
-    int m;      // number of constraints
-    int n;      // number of features
-    double v;   //objective function value
+	int m;      // number of constraints
+	int n;      // number of features
+	double v;   //objective function value
 
-    Simplex_Node(double **input_A, double *input_b, double *input_C, int m, int n)
-    {
-		this->A.resize(m);
-		for (int i = 0; i < m; i++) this->A[i].resize(n + 1);
-        
-        this->b.resize(m);
-		this->C.resize(n+1);
-        this->N.resize(n+1);
-        this->B.resize(m);
+	Simplex_Node(double **input_A, double *input_b, double *input_C, int m, int n)
+	{
+		this->A = new double*[m];
+		for (int i = 0; i < m; i++) {
+			this->A[i] = new double[n + 1];
+		}
+		this->b = new double[m];
+		this->C = new double[n + 1];
+		this->N = new int[n + 1];
+		this->B = new int[m];
 
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                this->A[i][j] = input_A[i][j];
-            }
-            this->b[i] = input_b[i];
-            this->B[i] = i;
-        }
-        for (int j = 0; j < n; j++) {
-            this->C[j] = input_C[j];
-            this->N[j] = j+m;
-        }
-        this->v = 0;
-        this->m = m;
-        this->n = n;
-    }
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				this->A[i][j] = input_A[i][j];
+			}
+			this->b[i] = input_b[i];
+			this->B[i] = i;
+		}
+		for (int j = 0; j < n; j++) {
+			this->C[j] = input_C[j];
+			this->N[j] = j + m;
+		}
+		this->v = 0;
+		this->m = m;
+		this->n = n;
+	}
+
+	~Simplex_Node()
+	{
+		if (A != NULL) {
+			for (int i = 0; i < m; i++)
+			{
+				delete[]A[i];
+			}
+			delete[]A;
+			A = NULL;
+		}
+		if (b != NULL) {
+			delete[]b;
+			b = NULL;
+		}
+		if (C != NULL) {
+			delete[]C;
+			C = NULL;
+		}
+		if (N != NULL) {
+			delete[]N;
+			N = NULL;
+		}
+		if (B != NULL) {
+			delete[]B;
+			B = NULL;
+		}
+	}
+private:
+	Simplex_Node(const Simplex_Node &obj){}
+	Simplex_Node & operator = (const Simplex_Node & obj){}
     
 };
 
 /*
-*   a structure to store the result of simplex algorithm
+*   a  class to store the result of simplex algorithm
 */
-struct LPresult{
-    vector<double> x;      //the solution to a LP
-    int flag;       //flag = 1 find an optimal solution
-                    //flag = 0 infeasible or unbounded
-    double value;   //optimal objective function value
-    LPresult(int d)
-    {
-        this->x.resize(d);
-        this->flag = 0;
-        this->value = 0;
-    }
+class LPresult{
+public:
+	double *x;      //the solution to a LP
+	int flag;       //flag = 1 find an optimal solution
+	//flag = 0 infeasible or unbounded
+	double value;   //optimal objective function value
+	int d;
+	LPresult(int d)
+	{
+		this->x = new double[d];
+		for (int i = 0; i < d; i++) this->x[i] = 0;
+		this->flag = 0;
+		this->value = 0;
+		this->d = d;
+	}
+
+	~LPresult()
+	{
+		if (x != NULL) {
+			delete[]x;
+			x = NULL;
+		}
+	}
+	LPresult(const LPresult &obj)
+	{
+		x = new double[obj.d];
+		for (int i = 0; i < obj.d; i++) {
+			x[i] = obj.x[i];
+		}
+		flag = obj.flag;
+		value = obj.value;
+		d = obj.d;
+	}
+private:
+	LPresult & operator=(const LPresult &obj){}
 };
 
 /*

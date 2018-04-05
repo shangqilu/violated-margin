@@ -4,7 +4,7 @@
 LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int n)
 {
     //puts("RunSimplex...");
-    Simplex_Node node = Simplex_Node(input_A, input_b, input_C, m, n);
+    Simplex_Node node(input_A, input_b, input_C, m, n);
     LPresult result = LPresult(n);
     bool re = Initial_Simplex(node);
     if (!re) {
@@ -428,7 +428,7 @@ bool OneDirectionLPClassification(PointSet &trainPoints, HyperPlane &plane, int 
 
 bool LPclassification(PointSet &trainPoints, HyperPlane &plane, int dimension)
 {
-    HyperPlane cur_plane = HyperPlane(dimension);
+    HyperPlane cur_plane(dimension);
     double max_margin = 0;
     int flag = 0;
     for (int j = 0; j < dimension; j++) {
@@ -448,17 +448,19 @@ bool LPclassification(PointSet &trainPoints, HyperPlane &plane, int dimension)
                 printf("find a solution in dimension %d with margin %lf\n", j, cur_margin);
                 PrintHyperPlane(cur_plane, cur_plane.d);
                 max_margin = cur_margin;
-                /*
+                
                 for (int j = 0; j < dimension; j++) {
                     plane.w[j] = cur_plane.w[j];
                 }
                 plane.b = cur_plane.b;
-                */
-                CopyHyperPlane(plane, cur_plane);
+                
+				puts("**Copy");
+                //CopyHyperPlane(plane, cur_plane);
             }
         }
 
     }
+	puts("***");
     if (!flag) return false;
     else return true;
 }

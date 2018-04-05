@@ -15,8 +15,9 @@ void TestSimplex()
     cout << train_points.size() << endl;
     //PrintPoints(train_points, dimension);
     //test for Simplex
-    HyperPlane plane = HyperPlane(dimension);
+    HyperPlane plane(dimension);
     bool found = LPclassification(train_points, plane, dimension);
+	puts("begin check");
     if (found) {
         puts("find a solution");
     } else {
@@ -43,10 +44,7 @@ void TestSimplex2()
         input_A[i] = A[i];
     double input_B[3] = {30,24,36};
     double input_C[3] = {3,1,2};
-    */
-
-
-    
+    */    
 
     double *input_A[2];
     double A[2][2]= {{2, -1},{1,-5}};
@@ -82,7 +80,7 @@ void TestPerceptron()
     PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
     //SimplePerceptron(train_points, dimension);
     
-    HyperPlane plane = HyperPlane(dimension);
+    HyperPlane plane(dimension);
     //bool found = MarginPerceptron(train_points, plane, dimension, 0.1, 3, 0.3);
     
     bool found = IncreMarginPerceptron(train_points, plane, dimension, 0.3);
@@ -153,7 +151,7 @@ void TestGaussianInverse()
 }
 
 
-void TestBoudingBox()
+void TestBoundingBox()
 {
     char train_data[] = "data/separable_test_2/titanic_train_data.asc";
     char train_label[] = "data/separable_test_2/titanic_train_label.asc";
@@ -173,7 +171,7 @@ void TestBoudingBox()
     for (int i = 0; i < dimension + 1; i++)
         MainTainT[i][i] = 1;
 
-    BoudingBox box = BoudingBox(dimension);
+    BoundingBox box(dimension);
     RecursionMinimumBoudingBox(points, box, MainTainT, dimension, dimension);
     //PrintBoudingBox(box);
 
@@ -247,7 +245,8 @@ void TestSmallerCoreSetandComputingDirection()
 
     PointSet smallerSet = SmallerCoreSet(points, directionPoints, dimension, epsilon);
     puts("after transform");
-    //PrintPoints(smallerSet, dimension);
+	//(0,0) is deleted
+    PrintPoints(smallerSet, dimension);
     delete []angles;
 }
 
@@ -284,12 +283,12 @@ void TestOneDimensionClassification()
     printf("there are %d points in all directions\n", directionPoints.size());
 
     int n = points.size();
-    HyperPlane optimal_plane = HyperPlane(dimension);
+    HyperPlane optimal_plane(dimension);
     double max_margin = 0;
     //
     for (int i = 0; i < directionPoints.size(); i++)
     {
-        HyperPlane cur_plane = HyperPlane(dimension);
+        HyperPlane cur_plane(dimension);
 
         bool separable = OneDimensionClassification(points, cur_plane, directionPoints[i], radius);
         //compute the margin of current plane
@@ -309,7 +308,7 @@ void TestOneDimensionClassification()
             {
                 PrintHyperPlane(cur_plane, dimension);
                 cout << "cur_dis: " << cur_distance << endl;
-                optimal_plane = cur_plane;
+				CopyHyperPlane(optimal_plane, cur_plane);
                 max_margin = cur_distance;
             }
         }
@@ -334,7 +333,7 @@ void TestDirectionalWidth()
     int dimension = 4;
     PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
 	*/
-    HyperPlane plane = HyperPlane(dimension);
+    HyperPlane plane(dimension);
 	bool found = DirectionalWidth(points, plane, dimension, epsilon);
     if(found) {
         puts("find a solution");
@@ -358,7 +357,7 @@ void TestViolatedMargin(int method)
     //char filename[] = "data/svm_guide_4.txt";
     int dimension = 3;
     PointSet trainPoints = LoadDataLibSVMFormat(filename, dimension);
-    HyperPlane plane = HyperPlane(dimension);
+    HyperPlane plane(dimension);
     int k = trainPoints.size() * 0.08;
     double epsilon = 0.1;
     double rho = 0.1;
@@ -373,9 +372,9 @@ void TestSampling()
     char filename[] = "D:/code/violated-margin/data/skin_nonskin_3.txt";
     int dimension = 3;
     PointSet trainPoints = LoadDataLibSVMFormat(filename, dimension);
-    PrintPoints(trainPoints, dimension);
+    //PrintPoints(trainPoints, dimension);
     PointSet subset = Sampling(trainPoints, dimension, 0.5);
     //puts("*****");
-    PrintPoints(subset, dimension);
+    //PrintPoints(subset, dimension);
     cout << subset.size();
 }

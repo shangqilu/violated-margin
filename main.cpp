@@ -19,12 +19,12 @@ int main(int nargs, char **args)
         return 0;
     }
     */
-    int method = args[1][0] - '0';
-    cout << method << endl;
-    TestViolatedMargin(method);
+    //int method = args[1][0] - '0';
+    //cout << method << endl;
+    //TestViolatedMargin(method);
     
     //TestDirectionalWidth();
     //TestPerceptron();
-    //TestSimplex();
+    TestSimplex();
     return 0;
 }

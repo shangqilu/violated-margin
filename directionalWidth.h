@@ -11,48 +11,119 @@ const int MaxIterTwoApprox = 1000;
 /*
 *   structure of the Bounding Box
 */
-struct BoudingBox{
-    vector<double> U;
-    vector<double> L;
-    int d;
+class BoundingBox{
+public:
+	double *U;
+	double *L;
+	int d;
 
-    BoudingBox(int d)
-    {
-        this->U.resize(d);
-        this->L.resize(d);
-        this->d = d;
-    }
+	BoundingBox(int d)
+	{
+		this->U = new double[d];
+		this->L = new double[d];
+		this->d = d;
+	}
+	~BoundingBox()
+	{
+		if (U != NULL) {
+			delete[]U;
+			U = NULL;
+		}
+		if (L != NULL) {
+			delete[]L;
+			L = NULL;
+		}
+	}
+private:
+	BoundingBox(const BoundingBox &obj){}
+	BoundingBox & operator = (const BoundingBox & obj){}
 };
 
 /*
 *   structure of a key in hash table
 */
-struct Key
+class Key
 {
-    vector<int> x;
-    int d;
-    int base;
-    Key(int d, int base)
-    {
-        this->d = d;
-        this->base = base;
-        this->x.resize(d);
-    }
+public:
+	int *x;
+	int d;
+	int base;
+	Key(int d, int base)
+	{
+		this->d = d;
+		this->base = base;
+		this->x = new int[d];
+	}
+	~Key()
+	{
+		if (x != NULL) {
+			delete[]x;
+			x = NULL;
+		}
+	}
+private:
+	Key(const Key &obj){}
+	Key & operator = (const Key &obj){}
 };
 
 /*
 *   structure of a pair in hash table
 */
-struct Pair{
-    int low_index;      //the index of lowest point in current pillar
-    int high_index;     //the index of highest point in current pillar
-    double low_value;   //the value of lowest point in current pillar
-    double high_value;  //the value of lowest point in current pillar
-    vector<int> x;             //the coordinate of current pillar
-    Pair(int d)
-    {
-        this->x.resize(d);
-    }
+class Pair{
+public:
+	int low_index;      //the index of lowest point in current pillar
+	int high_index;     //the index of highest point in current pillar
+	double low_value;   //the value of lowest point in current pillar
+	double high_value;  //the value of lowest point in current pillar
+	int *x;             //the coordinate of current pillar
+	int d;
+	Pair(int d)
+	{
+		this->x = new int[d];
+		this->d = d;
+		low_index = high_index = -1;
+		low_value = high_value = 0;
+	}
+	~Pair()
+	{
+		if (x != NULL) {
+			delete[]x;
+			x = NULL;
+		}
+	}
+	Pair(const Pair &obj)
+	{
+		x = new int[obj.d];
+		for (int i = 0; i < obj.d; i++)
+		{
+			x[i] = obj.x[i];
+		}
+		low_index = obj.low_index;
+		high_index = obj.high_index;
+		low_value = obj.low_value;
+		high_value = obj.high_value;
+		d = obj.d;
+	}
+	Pair& operator = (const Pair &obj)
+	{
+		if (this == &obj) {
+			return *this;
+		}
+		else {
+			delete[]x;
+			x = new int[obj.d];
+			for (int i = 0; i < obj.d; i++) {
+				x[i] = obj.x[i];
+			}
+			low_index = obj.low_index;
+			high_index = obj.high_index;
+			low_value = obj.low_value;
+			high_value = obj.high_value;
+			d = obj.d;
+		}
+	}
+private:
+	
 };
 
 /*
@@ -70,26 +141,34 @@ struct OneDim{
 /*
 *   hash table to find the lowest and highest points in a pillar
 */
-struct HashTable{
-    vector<Pair> table;
-    vector<bool> Empty;    //flag array
-    int M;          //table size
-    int p;          //divisor
-    HashTable(int M, int p, int d) //using the division method
-    {
-        this->M = M;
-        this->p = p;
-        for (int i = 0; i < M; i++) {
-            Pair newpair = Pair(d);
-            table.push_back(newpair);
-        }
-        Empty.resize(M);
-        for (int i = 0; i < M; i++) {
-            Empty[i] = true;
-        }
-    }
+class HashTable{
+public:
+	vector<Pair> table;
+	bool *Empty;    //flag array
+	int M;          //table size
+	int p;          //divisor
+	HashTable(int M, int p, int d) //using the division method
+	{
+		this->M = M;
+		this->p = p;
+		for (int i = 0; i < M; i++) {
+			Pair newpair(d);
+			table.push_back(newpair);
+		}
+		Empty = new bool[M];
+		for (int i = 0; i < M; i++) {
+			Empty[i] = true;
+		}
+	}
+	~HashTable()
+	{
+		if (Empty != NULL) {
+			delete[]Empty;
+			Empty = NULL;
+		}
+	}
 
-    int Hash_func(Key key)
+    int Hash_func(Key &key)
     {
         int value = 0;
         for (int i = 0; i < key.d; i++) {
@@ -98,14 +177,14 @@ struct HashTable{
         return value;
     }
 
-    bool key_match(Pair cur_pair, Key key)
+    bool key_match(Pair cur_pair, Key &key)
     {
         for (int i = 0; i < key.d; i++) {
             if (cur_pair.x[i] != key.x[i]) return false;
         }
         return true;
     }
-    void PrintKey(Key key)
+    void PrintKey(Key &key)
     {
         cout << "(";
         for (int i = 0; i < key.d-1; i++) {
@@ -114,7 +193,7 @@ struct HashTable{
         cout << key.x[key.d-1];
         cout << ")" << endl;
     }
-    bool Insert(Point &point, int d, int index, Key key)
+    bool Insert(Point &point, int d, int index, Key &key)
     {
         int value = Hash_func(key);
         value = value - 1;
@@ -183,10 +262,12 @@ struct HashTable{
         //cout << index_points.size() << endl;
         return index_points;
     }
-
+private:
+	HashTable& operator = (const HashTable &obj){}
+	HashTable(const HashTable &obj){}
 };
 
-void PrintBoudingBox(BoudingBox box);
+void PrintBoundingBox(BoundingBox box);
 
 
 /*
@@ -198,7 +279,7 @@ void PrintBoudingBox(BoudingBox box);
 *       dimension: current dimension
 *       realDimension: the real dimension of points and bounding box
 */
-bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **MainTainT, int dimension, int realDimension);
+bool RecursionMinimumBoudingBox(PointSet &points, BoundingBox &curbox, double **MainTainT, int dimension, int realDimension);
 
 /*
 *   Compute the two approximate diameter of a point set

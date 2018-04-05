@@ -29,7 +29,7 @@ bool TwoApproxiDiameter(PointSet &points, int dimension, int &s, int &t)
         }
         int flag = 0;
         Point direction = PointMinus(points[s], points[t], dimension);
-        Point axis = Point(dimension);
+        Point axis(dimension);
         axis.x[dimension-1] = 1;
         //cout << s << " " << t << endl;
         //the hyper plane s and t defined is not parallel to last dimension coordinate axis
@@ -54,7 +54,7 @@ bool TwoApproxiDiameter(PointSet &points, int dimension, int &s, int &t)
 
 
 
-bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **MainTainT, int dimension, int realDimension)
+bool RecursionMinimumBoudingBox(PointSet &points, BoundingBox &curbox, double **MainTainT, int dimension, int realDimension)
 {
     if (dimension == 0)
     {
@@ -70,7 +70,7 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
         return false;
     }
     int s, t;
-    Point d_axis = Point(dimension);
+    Point d_axis(dimension);
     bool found = TwoApproxiDiameter(points, dimension, s, t);
     if (!found)
     {
@@ -241,7 +241,7 @@ bool RecursionMinimumBoudingBox(PointSet &points, BoudingBox &curbox, double **M
 
 
 
-void PrintBoudingBox(BoudingBox box)
+void PrintBoudingBox(BoundingBox box)
 {
     for (int i = 0; i < box.d; i++)
     {
@@ -252,7 +252,7 @@ void PrintBoudingBox(BoudingBox box)
 PointSet SimpleCoreSet(PointSet &points, double **MainTainT, int dimension, double epsilon)
 {
 
-    BoudingBox box = BoudingBox(dimension);
+    BoundingBox box(dimension);
 
 
     bool found = RecursionMinimumBoudingBox(points, box, MainTainT, dimension, dimension);
@@ -324,8 +324,8 @@ PointSet SimpleCoreSet(PointSet &points, double **MainTainT, int dimension, doub
     int n = points.size();
     //printf("M: %d n: %d\n", M, n);
     int prime = LargestPrimeBelow(1.5*n);
-    HashTable table = HashTable(1.5*n, prime, dimension-1);
-    Key key = Key(dimension-1, M);
+    HashTable table(1.5*n, prime, dimension-1);
+    Key key(dimension-1, M);
     for (int i = 0; i < n; i++)
     {
         //cout << " " << i << " ";
@@ -492,7 +492,7 @@ bool DirectionalWidth(PointSet &points, HyperPlane &optimal_plane, int dimension
     //
     for (int i = 0; i < directionPoints.size(); i++)
     {
-        HyperPlane cur_plane = HyperPlane(dimension);
+        HyperPlane cur_plane(dimension);
         bool found = OneDimensionClassification(positiveCoreSet, cur_plane, directionPoints[i], radius);
         //compute the margin of current plane
         if (found)
@@ -615,7 +615,7 @@ void ComputingDirections(PointSet &points, double*angles, int curDimension, int 
 {
     if (curDimension == realDimension)
     {
-        Point cur_pt = Point(realDimension);
+        Point cur_pt(realDimension);
         for (int j = 0; j < realDimension; j++)
         {
             cur_pt.x[j] = radius;

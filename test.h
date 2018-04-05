@@ -19,7 +19,7 @@ void TestPerceptron();
 void TestGaussianEquation();
 void TestGaussianInverse();
 
-void TestBoudingBox();
+void TestBoundingBox();
 void TestSimpleCoreSet();
 
 

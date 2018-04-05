@@ -76,11 +76,11 @@ PointSet LoadDataLibSVMFormat(char* filename, int dimension)
         points.push_back(cur_pt);
         cnt ++ ;
     }
-	fclose(0);
+	fclose(fp);
     return points;
 }
 
-PointSet CopyPoints(PointSet points, int dimension)
+PointSet CopyPoints(PointSet &points, int dimension)
 {
     int n = points.size();
     PointSet newPoints;
@@ -117,7 +117,7 @@ double Dot(double* w, double *x, int dimension)
     return sum;
 }
 
-double Dot(Point pt1, Point pt2, int dimension)
+double Dot(Point &pt1, Point &pt2, int dimension)
 {
     double sum = 0;
     for (int i = 0; i < dimension; i++)
@@ -137,8 +137,8 @@ double Dot(vector<double> x, vector<double> y, int dimension)
 	return sum;
 }
 
-Point PointMinus(Point pt1, Point pt2, int dimension)
-{
+Point PointMinus(Point &pt1, Point &pt2, int dimension)
+{  
     Point ans = Point(dimension);
     for (int i = 0; i < dimension; i++)
     {
@@ -147,13 +147,13 @@ Point PointMinus(Point pt1, Point pt2, int dimension)
     return ans;
 }
 
-void PrintHyperPlane(HyperPlane plane, int dimension)
+void PrintHyperPlane(HyperPlane &plane, int dimension)
 {
     cout << "w: (";
-    for (int i = 0; i < dimension; i++)
+    for (int i = 0; i < plane.d; i++)
     {
         cout << plane.w[i];
-        if (i != dimension - 1)
+        if (i != plane.d - 1)
         {
             cout << ", ";
         }
@@ -162,7 +162,7 @@ void PrintHyperPlane(HyperPlane plane, int dimension)
     cout << "b: " << plane.b << endl;
 }
 
-double Distance(HyperPlane plane, Point pt, int dimension)
+double Distance(HyperPlane &plane, Point &pt, int dimension)
 {
     double dis = 0, denominator = 0;
     for (int i = 0; i < dimension; i++)
@@ -174,7 +174,7 @@ double Distance(HyperPlane plane, Point pt, int dimension)
     return fabs(dis)/sqrt(denominator);
 }
 
-double Distance(Point pt1, Point pt2, int dimension)
+double Distance(Point &pt1, Point &pt2, int dimension)
 {
     double dis = 0;
     for(int i = 0; i < dimension; i++)
@@ -185,7 +185,7 @@ double Distance(Point pt1, Point pt2, int dimension)
 }
 
 
-bool MinimumSeparableDistance(PointSet points, HyperPlane plane, double &min_dis)
+bool MinimumSeparableDistance(PointSet &points, HyperPlane &plane, double &min_dis)
 {
     int dimension = plane.d;
     int n = points.size();
@@ -212,7 +212,7 @@ bool MinimumSeparableDistance(PointSet points, HyperPlane plane, double &min_dis
 }
 
 
-bool MinimumViolatedDistance(PointSet points, HyperPlane plane, double &min_dis, int k, int &real_k)
+bool MinimumViolatedDistance(PointSet &points, HyperPlane &plane, double &min_dis, int k, int &real_k)
 {
     int dimension = plane.d;
     int n = points.size();
@@ -445,7 +445,7 @@ void PrintMatrix(double **T, int dimension)
 }
 
 
-void PrintPoints(PointSet points, int dimension)
+void PrintPoints(PointSet &points, int dimension)
 {
     for (int i = 0; i < points.size(); i++)
     {

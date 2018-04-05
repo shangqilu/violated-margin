@@ -22,6 +22,8 @@
 #define DEBUG(format,...)
 #endif
 
+#define PRINT_ERROR(format,...) printf("File: "__FILE__", Line: %05d: "format"\n", __LINE__, ##__VA_ARGS__)
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -30,50 +32,94 @@ using namespace std;
 
 const double MAX_DOUBLE = 1e300;
 const double ZERO = 0;
-const double ERROR = 1e-7;
+const double ERROR = 1e-10;
 
 /*
 *   the structure of a hyperplane
 */
-struct HyperPlane
+class HyperPlane
 {
-	vector<double> w;  //weights
-    double b;   //bias
-    int d;      //dimension
-    HyperPlane(int d)
-    {
-        this->w.resize(d);
-        this->b = 0;
-        this->d = d;
-    }
+public:
+	double *w;  //weights
+	double b;   //bias
+	int d;      //dimension
+	HyperPlane(int d)
+	{
+		this->w = new double[d];
+		this->b = 0;
+		this->d = d;
+	}
+	~HyperPlane()
+	{
+		delete []w;
+	}
+	
     void Clear()
     {
         for (int i = 0; i < this->d; i++)
             this->w[i] = 0;
         this->b = 0;
     }
+
+private:
+	HyperPlane(const HyperPlane &obj){}
+	HyperPlane& operator = (const HyperPlane &obj){}
+
 };
 
 /*
-*   the structure of a point
+*   the class of a point
 */
-struct Point
-{
-    vector<double> x;  //x coordinates
-    int y;      //label
+class Point{
+public:
+    double *x;
+    int y;
+    int dimension;
     Point(int d)
     {
-        this->x.resize(d);
-        this->y = 0;
-    }
-    Point(int d, double *x, int y)
-    {
-		this->x.resize(d);
+        x = new double[d];
         for (int i = 0; i < d; i++)
-            this->x[i] = x[i];
-        this->y = y;
+            x[i] = 0;
+        y = 0;
+        this->dimension = d;
     }
-    
+    ~Point()
+    {
+        if (x != NULL)
+        {
+            delete []x;
+            x = NULL;
+        }
+    }
+
+    Point(const Point& obj) 
+    {
+        x = new double[obj.dimension];
+        for (int i = 0; i < obj.dimension; i++)
+        {
+            x[i] = obj.x[i];
+        }
+        y = obj.y;
+        dimension = obj.dimension;
+    }
+    Point& operator = (const Point & obj) 
+    {
+        if (this == &obj) {
+            return *this;
+        }
+        else {
+            delete[]x;
+            x = new double[obj.dimension];
+            for (int i = 0; i < obj.dimension; i++)
+            {
+                x[i] = obj.x[i];
+            }
+            y = obj.y;
+            dimension = obj.dimension;
+            return *this;
+        }
+    }
+private:
 };
 
 /*
@@ -94,7 +140,7 @@ PointSet LoadDataLibSVMFormat(char* filename, int dimension);
 /*
 *   return a Point Set by copying the data set
 */
-PointSet CopyPoints(PointSet points, int dimension);
+PointSet CopyPoints(PointSet &points, int dimension);
 
 /*
 *   copy the content of plane2 to plane1
@@ -109,7 +155,7 @@ double Dot(double* w, double *x, int dimension);
 /*
 *   compute the dot product of two points
 */
-double Dot(Point pt1, Point pt2, int dimension);
+double Dot(Point &pt1, Point &pt2, int dimension);
 
 /*
 *   compute the dot product of two vectors
@@ -118,31 +164,31 @@ double Dot(vector<double> x, vector<double> y, int dimension);
 /*
 *   compute the vector of p1-p2
 */
-Point PointMinus(Point pt1, Point pt2, int dimension);
+Point PointMinus(Point &pt1, Point &pt2, int dimension);
 
-void PrintHyperPlane(HyperPlane plane, int dimension);
+void PrintHyperPlane(HyperPlane &plane, int dimension);
 /*
 *   compute the distance from a point to a plane
 */
-double Distance(HyperPlane plane, Point pt, int dimension);
+double Distance(HyperPlane &plane, Point &pt, int dimension);
 /*
 *   compute the distance between two points
 */
-double Distance(Point pt1, Point pt2, int dimension);
+double Distance(Point &pt1, Point &pt2, int dimension);
 
 /*
 *   return whether points can be separated correctly by a hyperplane
 *       if return true min_dis record the minimal distance from points to the plane
 *       else return false
 */
-bool MinimumSeparableDistance(PointSet points, HyperPlane plane, double &min_dis);
+bool MinimumSeparableDistance(PointSet &points, HyperPlane &plane, double &min_dis);
 
 /*
 *   return whether points can be separated by a hyperplane without violating k points
 *       if return true min_dis records the minimal distance from points to the plane
 *       else return false real_k records the number of points the plane violates
 */
-bool MinimumViolatedDistance(PointSet points, HyperPlane plane, double &min_dis, int k, int &reak_k);
+bool MinimumViolatedDistance(PointSet &points, HyperPlane &plane, double &min_dis, int k, int &reak_k);
 
 /*
 *   compute the solution of a equation set
@@ -171,7 +217,7 @@ void MatrixMultiply(double **A, double **B, double **C, int dimension);
 */
 void TransformingPoints(PointSet &points, double **T, int point_dimension);
 
-void PrintPoints(PointSet points, int dimension);
+void PrintPoints(PointSet &points, int dimension);
 
 /*
 *   compute the largest prime which is no more greater than m

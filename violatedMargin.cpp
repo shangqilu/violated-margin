@@ -71,7 +71,7 @@ bool ViolatedMargin(PointSet &points, HyperPlane &optimal_plane, int dimension,
         double p = 1.0*dimension/k;
         PointSet subpoints = Sampling(points, dimension, p);
         printf("Sub Set size %d ...\n", subpoints.size());
-        HyperPlane plane = HyperPlane(dimension);
+        HyperPlane plane(dimension);
         bool found = MarginClasification(subpoints, plane, dimension, rho, method);
         if (found)
         {
