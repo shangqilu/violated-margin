@@ -48,7 +48,7 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
                     max_delta = tmp;
                     min_index = node.B[i];
                 }
-                if (fabs(max_delta - tmp)< ERROR) {
+				if (fabs(max_delta - tmp)< ZERO_ERROR) {
                     if(min_index > node.B[i]) {
                         leaving = i;
                         max_delta = tmp;
@@ -200,7 +200,7 @@ bool Initial_Simplex(Simplex_Node &node)
                     max_delta = tmp;
                     min_index = node.B[i];
                 }
-                if (fabs(max_delta - tmp)< ERROR) {
+				if (fabs(max_delta - tmp)< ZERO_ERROR) {
                     if(min_index > node.B[i]) {
                         leaving = i;
                         max_delta = tmp;
@@ -219,7 +219,7 @@ bool Initial_Simplex(Simplex_Node &node)
         }
 
     }
-    if (!flag || fabs(node.v - 0) > ERROR) {
+	if (!flag || fabs(node.v - 0) > ZERO_ERROR) {
         //cout << flag << " " << node.v << endl;
         //puts("infeasible!");
         delete []back_c;
@@ -446,21 +446,18 @@ bool LPclassification(PointSet &trainPoints, HyperPlane &plane, int dimension)
             }
             if (separable && cur_margin > max_margin) {
                 printf("find a solution in dimension %d with margin %lf\n", j, cur_margin);
-                PrintHyperPlane(cur_plane, cur_plane.d);
+                PrintHyperPlane(cur_plane);
                 max_margin = cur_margin;
                 
                 for (int j = 0; j < dimension; j++) {
                     plane.w[j] = cur_plane.w[j];
                 }
                 plane.b = cur_plane.b;
-                
-				puts("**Copy");
                 //CopyHyperPlane(plane, cur_plane);
             }
         }
 
     }
-	puts("***");
     if (!flag) return false;
     else return true;
 }

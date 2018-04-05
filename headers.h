@@ -32,7 +32,7 @@ using namespace std;
 
 const double MAX_DOUBLE = 1e300;
 const double ZERO = 0;
-const double ERROR = 1e-10;
+const double ZERO_ERROR = 1e-10;
 
 /*
 *   the structure of a hyperplane
@@ -74,14 +74,14 @@ class Point{
 public:
     double *x;
     int y;
-    int dimension;
+    int dim;
     Point(int d)
     {
         x = new double[d];
         for (int i = 0; i < d; i++)
             x[i] = 0;
         y = 0;
-        this->dimension = d;
+        this->dim = d;
     }
     ~Point()
     {
@@ -94,13 +94,13 @@ public:
 
     Point(const Point& obj) 
     {
-        x = new double[obj.dimension];
-        for (int i = 0; i < obj.dimension; i++)
+        x = new double[obj.dim];
+        for (int i = 0; i < obj.dim; i++)
         {
             x[i] = obj.x[i];
         }
         y = obj.y;
-        dimension = obj.dimension;
+        dim = obj.dim;
     }
     Point& operator = (const Point & obj) 
     {
@@ -109,13 +109,13 @@ public:
         }
         else {
             delete[]x;
-            x = new double[obj.dimension];
-            for (int i = 0; i < obj.dimension; i++)
+            x = new double[obj.dim];
+            for (int i = 0; i < obj.dim; i++)
             {
                 x[i] = obj.x[i];
             }
             y = obj.y;
-            dimension = obj.dimension;
+            dim = obj.dim;
             return *this;
         }
     }
@@ -155,7 +155,7 @@ double Dot(double* w, double *x, int dimension);
 /*
 *   compute the dot product of two points
 */
-double Dot(Point &pt1, Point &pt2, int dimension);
+double Dot(Point &pt1, Point &pt2);
 
 /*
 *   compute the dot product of two vectors
@@ -164,17 +164,18 @@ double Dot(vector<double> x, vector<double> y, int dimension);
 /*
 *   compute the vector of p1-p2
 */
-Point PointMinus(Point &pt1, Point &pt2, int dimension);
+Point PointMinus(Point &pt1, Point &pt2);
 
-void PrintHyperPlane(HyperPlane &plane, int dimension);
+void PrintHyperPlane(HyperPlane &plane);
 /*
 *   compute the distance from a point to a plane
 */
-double Distance(HyperPlane &plane, Point &pt, int dimension);
+double Distance(HyperPlane &plane, Point &pt);
 /*
 *   compute the distance between two points
 */
-double Distance(Point &pt1, Point &pt2, int dimension);
+double Distance(Point &pt1, Point &pt2);
+
 
 /*
 *   return whether points can be separated correctly by a hyperplane
@@ -235,5 +236,11 @@ long long Factorial(int d);
 *   compute the Log Factorial of d
 */
 double LogFactorial(int d);
+
+
+/*
+*   Print Error
+*/
+void PrintError(string msg);
 
 #endif  //__HEADERS_H__

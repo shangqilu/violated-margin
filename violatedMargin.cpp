@@ -35,7 +35,7 @@ bool ApproximateViolatedMargin(PointSet &points, HyperPlane &optimal_plane, int 
     {
         double margin = 0;
         int real_k = 0;
-        bool k_separable = MinimumViolatedDistance(points, optimal_plane, margin, k, real_k);
+        bool k_separable = MinimumViolatedDistance(points, optimal_plane, margin, (1+epsilon)*k, real_k);
         if (k_separable)
         {
             puts("Separating original set correctly");
@@ -65,6 +65,26 @@ bool ViolatedMargin(PointSet &points, HyperPlane &optimal_plane, int dimension,
     double max_margin = 0;
 
     bool flag = false;
+	PointSet coresetDirections;
+	PointSet classifyDirections;
+	if (method == 2){
+		//compute those directions set the angle with epsilon
+		//compute direction set for constructing CoreSet
+		double alpha = 1.0 / (dimension*(4 * dimension + 1));
+		double single_algle = sqrt(rho*alpha / 4);
+		double radius = sqrt(dimension) + 1;
+
+		double *angles = new double[dimension - 1];
+		PointSet directionPoints;
+		//puts("computing directions...");
+		ComputingDirections(coresetDirections, angles, 1, dimension, delta, radius);
+
+
+		ComputingDirections(classifyDirections, angles, 1, dimension, rho, 1);
+		delete[]angles;
+	}
+
+
     for (int curtime = 0; curtime < 1000000; curtime++)
     {
         printf("Current repeating time: %d\n", curtime);
@@ -72,7 +92,7 @@ bool ViolatedMargin(PointSet &points, HyperPlane &optimal_plane, int dimension,
         PointSet subpoints = Sampling(points, dimension, p);
         printf("Sub Set size %d ...\n", subpoints.size());
         HyperPlane plane(dimension);
-        bool found = MarginClasification(subpoints, plane, dimension, rho, method);
+        bool found = MarginClasification(subpoints, plane, dimension, rho, method, coresetDirections, classifyDirections);
         if (found)
         {
             puts("find a solution in the sub set");
@@ -87,7 +107,7 @@ bool ViolatedMargin(PointSet &points, HyperPlane &optimal_plane, int dimension,
                 //optimal_plane = plane;
                 printf("a solution in the set ");
                 cout << max_margin << endl;
-                PrintHyperPlane(plane, dimension);
+                PrintHyperPlane(plane);
                 CopyHyperPlane(optimal_plane, plane);
                 break;
             }
@@ -127,7 +147,8 @@ PointSet Sampling(PointSet &points, int dimension, double p)
 }
 
 
-bool MarginClasification(PointSet &points, HyperPlane &plane, int dimension, double rho, int method)
+bool MarginClasification(PointSet &points, HyperPlane &plane, int dimension, double rho, 
+	int method, PointSet &coresetDirections, PointSet &classifyDirections)
 {
     if (method == 0)
     {
@@ -139,7 +160,7 @@ bool MarginClasification(PointSet &points, HyperPlane &plane, int dimension, dou
     }
     else if (method == 2)
     {
-        return DirectionalWidth(points, plane, dimension, rho);
+		return DirectionalWidth(points, plane, dimension, rho, coresetDirections, classifyDirections);
     }
     else
     {

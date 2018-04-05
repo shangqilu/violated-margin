@@ -279,7 +279,8 @@ void PrintBoundingBox(BoundingBox box);
 *       dimension: current dimension
 *       realDimension: the real dimension of points and bounding box
 */
-bool RecursionMinimumBoudingBox(PointSet &points, BoundingBox &curbox, double **MainTainT, int dimension, int realDimension);
+bool RecursionMinimumBoudingBox(PointSet &points, BoundingBox &curbox, double **MainTainT, 
+	int dimension, int realDimension);
 
 /*
 *   Compute the two approximate diameter of a point set
@@ -306,6 +307,9 @@ PointSet SmallerCoreSet(PointSet &points, PointSet directionPoints, int dimensio
 */
 bool DirectionalWidth(PointSet &points, HyperPlane &plane, int dimension, double rho);
 
+bool DirectionalWidth(PointSet &points, HyperPlane &plane, int dimension, double rho,
+	PointSet &coresetDirections, PointSet &classifyDirections);
+
 /*
 *   Given a direction, compute a hyperplane with largest margin in one dimension
 */
@@ -315,7 +319,8 @@ bool OneDimensionClassification(PointSet &points, HyperPlane &cur_plane, Point d
 *   recursively compute directions
 *   store them in points set
 */
-void ComputingDirections(PointSet &points, double*angles, int curDimension, int realDimension, double delta, double radius);
+void ComputingDirections(PointSet &points, double*angles, int curDimension, int realDimension, 
+	double delta, double radius);
 
 
 #endif // DIRECTIONALWIDTH_H_INCLUDED

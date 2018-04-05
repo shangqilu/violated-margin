@@ -9,7 +9,9 @@ using namespace std;
 
 int main(int nargs, char **args)
 {
-    /*
+#ifndef __DEBUG__
+	srand(time(NULL));
+#endif // __DEBUG__
     if (nargs != 2 || !isdigit(args[1][0])) {
         puts("input: executing_name method_number");
         puts("there are three methods");
@@ -18,13 +20,13 @@ int main(int nargs, char **args)
         puts("2: directional width");
         return 0;
     }
-    */
-    //int method = args[1][0] - '0';
-    //cout << method << endl;
-    //TestViolatedMargin(method);
+    
+    int method = args[1][0] - '0';
+    cout << method << endl;
+    TestViolatedMargin(method);
     
     //TestDirectionalWidth();
     //TestPerceptron();
-    TestSimplex();
+    //TestSimplex();
     return 0;
 }

@@ -43,42 +43,56 @@ PointSet LoadData(char* filename, char* label_filename, int dimension)
 //load data from single file
 PointSet LoadDataLibSVMFormat(char* filename, int dimension)
 {
-    PointSet points;
-    FILE *fp = fopen(filename, "r");
-    if (fp == NULL) {
-        puts("cannot open file!");
-        return points;
-    }
-    int cnt = 0;
-    while(!feof(fp)) {
-        Point cur_pt = Point(dimension);
-        int label;
-        fscanf(fp, "%d", &label);
-        if (label == 1) {
-            cur_pt.y = 1;
-        }else {
-            cur_pt.y = -1;
-        }
-        char c;
-        int i;
-        double content;
-        while((c=fgetc(fp))!= '\n') {
-            if (c == EOF) {
-                break;
-            }
-            if (isdigit(c)) {
-                ungetc(c,fp);
-                fscanf(fp, "%d:%lf", &i, &content);
-                //cout << i << " " << content << " " << cnt << endl;
-                cur_pt.x[i-1] = content;
-            }
-        }
-        points.push_back(cur_pt);
-        cnt ++ ;
-    }
+	PointSet points;
+	FILE *fp = fopen(filename, "r");
+	if (fp == NULL) {
+		puts("cannot open file!");
+		return points;
+	}
+	int cnt = 0;
+	while (!feof(fp)) {
+		if (cnt % 10000 == 0) cout << cnt << endl;
+		char c;
+		while (1) {
+			c = fgetc(fp);
+			if (c == EOF) {
+				return points;
+			}
+			if (c == '-' || isdigit(c)) {
+				ungetc(c, fp);
+				break;
+			}
+		}
+		Point cur_pt = Point(dimension);
+		int label;
+		fscanf(fp, "%d", &label);
+		if (label == 1) {
+			cur_pt.y = 1;
+		}
+		else {
+			cur_pt.y = -1;
+		}
+
+		int i;
+		double content;
+		while ((c = fgetc(fp)) != '\n') {
+			if (c == EOF) {
+				break;
+			}
+			if (isdigit(c)) {
+				ungetc(c, fp);
+				fscanf(fp, "%d:%lf", &i, &content);
+				//cout << i << " " << content << " " << cnt << endl;
+				cur_pt.x[i - 1] = content;
+			}
+		}
+		points.push_back(cur_pt);
+		cnt++;
+	}
 	fclose(fp);
-    return points;
+	return points;
 }
+
 
 PointSet CopyPoints(PointSet &points, int dimension)
 {
@@ -117,10 +131,10 @@ double Dot(double* w, double *x, int dimension)
     return sum;
 }
 
-double Dot(Point &pt1, Point &pt2, int dimension)
+double Dot(Point &pt1, Point &pt2)
 {
     double sum = 0;
-    for (int i = 0; i < dimension; i++)
+    for (int i = 0; i < pt1.dim; i++)
     {
         sum += pt1.x[i]*pt2.x[i];
     }
@@ -137,17 +151,17 @@ double Dot(vector<double> x, vector<double> y, int dimension)
 	return sum;
 }
 
-Point PointMinus(Point &pt1, Point &pt2, int dimension)
+Point PointMinus(Point &pt1, Point &pt2)
 {  
-    Point ans = Point(dimension);
-    for (int i = 0; i < dimension; i++)
+    Point ans = Point(pt1.dim);
+    for (int i = 0; i < pt1.dim; i++)
     {
         ans.x[i] = pt1.x[i] - pt2.x[i];
     }
     return ans;
 }
 
-void PrintHyperPlane(HyperPlane &plane, int dimension)
+void PrintHyperPlane(HyperPlane &plane)
 {
     cout << "w: (";
     for (int i = 0; i < plane.d; i++)
@@ -162,10 +176,10 @@ void PrintHyperPlane(HyperPlane &plane, int dimension)
     cout << "b: " << plane.b << endl;
 }
 
-double Distance(HyperPlane &plane, Point &pt, int dimension)
+double Distance(HyperPlane &plane, Point &pt)
 {
     double dis = 0, denominator = 0;
-    for (int i = 0; i < dimension; i++)
+	for (int i = 0; i < plane.d; i++)
     {
         dis += plane.w[i]*pt.x[i];
         denominator += plane.w[i]*plane.w[i];
@@ -174,10 +188,10 @@ double Distance(HyperPlane &plane, Point &pt, int dimension)
     return fabs(dis)/sqrt(denominator);
 }
 
-double Distance(Point &pt1, Point &pt2, int dimension)
+double Distance(Point &pt1, Point &pt2)
 {
     double dis = 0;
-    for(int i = 0; i < dimension; i++)
+	for (int i = 0; i < pt1.dim; i++)
     {
         dis += (pt1.x[i] - pt2.x[i]) * (pt1.x[i] - pt2.x[i]);
     }
@@ -194,16 +208,16 @@ bool MinimumSeparableDistance(PointSet &points, HyperPlane &plane, double &min_d
     double min_margin = MAX_DOUBLE;
     for (int i = 0; i < n; i++)
     {
-        if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < ERROR)
+		if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < ZERO_ERROR)
         {
             return false;
         }
-        double cur_dis = Distance(plane, points[i], dimension);
+        double cur_dis = Distance(plane, points[i]);
         if (cur_dis < min_margin ) {
             min_margin = cur_dis;
         }
     }
-    if (fabs(min_margin - MAX_DOUBLE) < ERROR) {
+	if (fabs(min_margin - MAX_DOUBLE) < ZERO_ERROR) {
         return false;
     } else {
         min_dis = min_margin;
@@ -222,11 +236,11 @@ bool MinimumViolatedDistance(PointSet &points, HyperPlane &plane, double &min_di
     int wrong_num = 0;
     for (int i = 0; i < n; i++)
     {
-        if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < ERROR)
+		if (points[i].y*(Dot(plane.w, points[i].x, dimension) + plane.b) < ZERO_ERROR)
         {
             wrong_num ++;
         }else {
-            double cur_dis = Distance(plane, points[i], dimension);
+            double cur_dis = Distance(plane, points[i]);
             if (cur_dis < min_margin ) {
                 min_margin = cur_dis;
             }
@@ -237,7 +251,7 @@ bool MinimumViolatedDistance(PointSet &points, HyperPlane &plane, double &min_di
         printf("wrong numbers : %d\n", wrong_num);
         return false;
     }
-    if (fabs(min_margin - MAX_DOUBLE) < ERROR) {
+	if (fabs(min_margin - MAX_DOUBLE) < ZERO_ERROR) {
         return false;
     } else {
         min_dis = min_margin;
@@ -275,7 +289,7 @@ bool GaussianEquation(double** A, double* b, double* x, int n)
                 maxLineIndex = j;
             }
         }
-        if(fabs(colMax) < ERROR)
+		if (fabs(colMax) < ZERO_ERROR)
         {
             puts("There is no solution to the equation set");
             //singular matrix
@@ -357,7 +371,7 @@ bool GaussianInverseMatrix(double** A, double**B, int n)
                 maxLineIndex = j;
             }
         }
-        if(fabs(colMax) < ERROR)
+		if (fabs(colMax) < ZERO_ERROR)
         {
             //puts("There is no solution to the inverse matrix");
             //singular matrix
@@ -565,3 +579,8 @@ double LogFactorial(int d)
 }
 
 
+void PrintError(string msg)
+{
+	printf("%s\n", msg.c_str());
+	exit(0);
+}

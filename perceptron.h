@@ -16,9 +16,10 @@ void SimplePerceptron(PointSet &trainPoints, int dimension);
 
 /*
 *   compute a hyperplane with margin at least (1-epsilon)y_guess if y_guess < y_opt
-*   R is the largest distance between a point from Points Set to origin
+*   R and y_min is the largest and smallest distance between a point 
+*	from Points Set to origin in d+1 dimension
 */
-bool MarginPerceptron(PointSet &trainPoints, HyperPlane &plane, int dimension, double y_guess, double R, double epsilon);
+bool BallMarginPerceptron(PointSet &trainPoints, HyperPlane &plane, int dimension, double y_guess, double R, double y_min);
 
 /*
 *   compute a separation hyperplane with margin at least (1-rho)*y_opt

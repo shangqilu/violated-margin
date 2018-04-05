@@ -27,7 +27,7 @@ void TestSimplex()
     double cur_distance = 0;
     bool separable = MinimumSeparableDistance(train_points, plane, cur_distance);
     if (separable) {
-        PrintHyperPlane(plane, plane.d);
+        PrintHyperPlane(plane);
         cout << "cur_dis: " << cur_distance << endl;
     }
 
@@ -75,11 +75,11 @@ void TestPerceptron()
     //test for Margin Perceptron
     //SimplePerceptron(train_points, dimension);
     
-    char filename[] = "data/twoSamePts_2.txt";
-    int dimension = 2;
+    char filename[] = "data/iris_4.txt";
+    int dimension = 4;
     PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
-    //SimplePerceptron(train_points, dimension);
-    
+    SimplePerceptron(train_points, dimension);
+	/*
     HyperPlane plane(dimension);
     //bool found = MarginPerceptron(train_points, plane, dimension, 0.1, 3, 0.3);
     
@@ -89,13 +89,13 @@ void TestPerceptron()
         double cur_distance = 0;
         bool separable = MinimumSeparableDistance(train_points, plane, cur_distance);
         if (separable) {
-            PrintHyperPlane(plane, plane.d);
+            PrintHyperPlane(plane);
             cout << "cur_dis: " << cur_distance << endl;
         }
     }else {
         puts("there is no solution");
     }
-    
+    */
 }
 
 void TestGaussianEquation()
@@ -298,7 +298,7 @@ void TestOneDimensionClassification()
             double cur_distance = MAX_DOUBLE;
             for (int i = 0; i < n; i++)
             {
-                double tmp_dis = Distance(cur_plane, points[i], dimension);
+                double tmp_dis = Distance(cur_plane, points[i]);
                 if (tmp_dis < cur_distance)
                 {
                     cur_distance = tmp_dis;
@@ -306,7 +306,7 @@ void TestOneDimensionClassification()
             }
             if (cur_distance > max_margin)
             {
-                PrintHyperPlane(cur_plane, dimension);
+                PrintHyperPlane(cur_plane);
                 cout << "cur_dis: " << cur_distance << endl;
 				CopyHyperPlane(optimal_plane, cur_plane);
                 max_margin = cur_distance;
@@ -340,7 +340,7 @@ void TestDirectionalWidth()
         double cur_distance = 0;
 		bool separable = MinimumSeparableDistance(points, plane, cur_distance);
         if (separable) {
-            PrintHyperPlane(plane, plane.d);
+            PrintHyperPlane(plane);
             cout << "cur_dis: " << cur_distance << endl;
         }
 
@@ -356,9 +356,9 @@ void TestViolatedMargin(int method)
     char filename[] = "data/skin_nonskin_3.txt";
     //char filename[] = "data/svm_guide_4.txt";
     int dimension = 3;
-    PointSet trainPoints = LoadDataLibSVMFormat(filename, dimension);
+	PointSet trainPoints = LoadDataLibSVMFormat(filename, dimension);
     HyperPlane plane(dimension);
-    int k = trainPoints.size() * 0.08;
+    int k = trainPoints.size() * 0.06;
     double epsilon = 0.1;
     double rho = 0.1;
     double delta = 0.5;
@@ -377,4 +377,19 @@ void TestSampling()
     //puts("*****");
     //PrintPoints(subset, dimension);
     cout << subset.size();
+}
+
+
+
+void TestDataGenerator()
+{
+	char filename[] = "data/Margin_dataset5E6D5.txt";
+
+	int totalNum = 5000000;
+	int noiseNum = totalNum * 0.01;
+	int dimension = 5;
+	double margin = 1.0 / dimension;
+	double radius = 1;
+	GenMarginDataSet(filename, dimension, margin, radius, totalNum, noiseNum);
+
 }

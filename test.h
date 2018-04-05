@@ -6,7 +6,7 @@
 #include "simplex.h"
 #include "directionalWidth.h"
 #include "violatedMargin.h"
-
+#include "dataGenerator.h"
 using namespace std;
 
 
@@ -33,4 +33,6 @@ void TestDirectionalWidth();
 void TestViolatedMargin(int method);
 
 void TestSampling();
+
+void TestDataGenerator();
 #endif // TEST_H_INCLUDED

@@ -19,9 +19,10 @@ PointSet Sampling(PointSet &points, int dimension, double p);
 *   choose a margin classification algorithm
 *		method = 0: perceptron algorithm
 *		method = 1: simplex algorithm
-*		method = 2: directional width 
+*		method = 2: directional width algorithm
 */
-bool MarginClasification(PointSet &points, HyperPlane &plane, int dimension, double rho, int method);
+bool MarginClasification(PointSet &points, HyperPlane &plane, int dimension, double rho,
+	int method, PointSet &coresetDirections, PointSet &classifyDirections);
 
 /*
 *	compute a hyperplane violated no more than (1+epsilon)*k points
