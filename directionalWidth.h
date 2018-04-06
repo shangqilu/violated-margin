@@ -20,7 +20,12 @@ public:
 	BoundingBox(int d)
 	{
 		this->U = new double[d];
+		
 		this->L = new double[d];
+		for (int i = 0; i < d; i++) {
+			U[i] = 0;
+			L[i] = 0;
+		}
 		this->d = d;
 	}
 	~BoundingBox()
@@ -53,6 +58,10 @@ public:
 		this->d = d;
 		this->base = base;
 		this->x = new int[d];
+		for (int i = 0; i < d; i++)
+		{
+			x[i] = 0;
+		}
 	}
 	~Key()
 	{
@@ -80,6 +89,7 @@ public:
 	Pair(int d)
 	{
 		this->x = new int[d];
+		for (int i = 0; i < d; i++) x[i] = 0;
 		this->d = d;
 		low_index = high_index = -1;
 		low_value = high_value = 0;

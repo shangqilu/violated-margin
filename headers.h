@@ -46,6 +46,7 @@ public:
 	HyperPlane(int d)
 	{
 		this->w = new double[d];
+		for (int i = 0; i < d; i++) w[i] = 0;
 		this->b = 0;
 		this->d = d;
 	}
@@ -126,6 +127,10 @@ private:
 *   Points Set
 */
 typedef vector<Point> PointSet;
+/*
+*	Point Index
+*/
+typedef vector<int> PointIndex;
 
 /*
 *   Load data from two files, a data file and a label file
@@ -155,7 +160,7 @@ double Dot(double* w, double *x, int dimension);
 /*
 *   compute the dot product of two points
 */
-double Dot(Point &pt1, Point &pt2);
+double Dot(Point &pt1, Point &pt2, int dimension);
 
 /*
 *   compute the dot product of two vectors
@@ -164,17 +169,17 @@ double Dot(vector<double> x, vector<double> y, int dimension);
 /*
 *   compute the vector of p1-p2
 */
-Point PointMinus(Point &pt1, Point &pt2);
+Point PointMinus(Point &pt1, Point &pt2, int dimension);
 
 void PrintHyperPlane(HyperPlane &plane);
 /*
 *   compute the distance from a point to a plane
 */
-double Distance(HyperPlane &plane, Point &pt);
+double Distance(HyperPlane &plane, Point &pt, int dimension);
 /*
 *   compute the distance between two points
 */
-double Distance(Point &pt1, Point &pt2);
+double Distance(Point &pt1, Point &pt2, int dimension);
 
 
 /*
@@ -185,11 +190,19 @@ double Distance(Point &pt1, Point &pt2);
 bool MinimumSeparableDistance(PointSet &points, HyperPlane &plane, double &min_dis);
 
 /*
-*   return whether points can be separated by a hyperplane without violating k points
+*   return whether sub set points can be separated by a hyperplane without violating k points
 *       if return true min_dis records the minimal distance from points to the plane
 *       else return false real_k records the number of points the plane violates
 */
 bool MinimumViolatedDistance(PointSet &points, HyperPlane &plane, double &min_dis, int k, int &reak_k);
+
+/*
+*   return whether points can be separated by a hyperplane without violating k points
+*       if return true min_dis records the minimal distance from points to the plane
+*       else return false real_k records the number of points the plane violates
+*/
+bool MinimumSubsetViolatedDistance(PointSet &points, PointIndex &index,
+	HyperPlane &plane, double &min_dis, int k, int &real_k);
 
 /*
 *   compute the solution of a equation set

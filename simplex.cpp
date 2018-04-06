@@ -7,6 +7,7 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
     Simplex_Node node(input_A, input_b, input_C, m, n);
     LPresult result = LPresult(n);
     bool re = Initial_Simplex(node);
+	//puts("after initial");
     if (!re) {
         //puts("It is infeasible in initial simplex!");
         return result;

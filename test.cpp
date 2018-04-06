@@ -64,29 +64,33 @@ void TestSimplex2()
     //
 }
 
+
+
 void TestPerceptron()
 {
-    /*
-    char train_data[] = "data/separable_test_2/titanic_train_data.asc";
+    
+    /*char train_data[] = "data/separable_test_2/titanic_train_data.asc";
     char train_label[] = "data/separable_test_2/titanic_train_label.asc";
     int dimension = 2;
     PointSet train_points = LoadData(train_data, train_label, dimension);
-    */
+	PrintPoints(train_points, dimension);*/
+
     //test for Margin Perceptron
     //SimplePerceptron(train_points, dimension);
     
     char filename[] = "data/iris_4.txt";
     int dimension = 4;
-    PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
-    SimplePerceptron(train_points, dimension);
-	/*
+	PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
+    //SimplePerceptron(train_points, dimension);
+	
     HyperPlane plane(dimension);
     //bool found = MarginPerceptron(train_points, plane, dimension, 0.1, 3, 0.3);
     
-    bool found = IncreMarginPerceptron(train_points, plane, dimension, 0.3);
+    bool found = IncreMarginPerceptron(train_points, plane, dimension, 0.1);
     if(found) {
         puts("find a solution");
         double cur_distance = 0;
+		PrintHyperPlane(plane);
         bool separable = MinimumSeparableDistance(train_points, plane, cur_distance);
         if (separable) {
             PrintHyperPlane(plane);
@@ -95,7 +99,7 @@ void TestPerceptron()
     }else {
         puts("there is no solution");
     }
-    */
+    
 }
 
 void TestGaussianEquation()
@@ -157,7 +161,7 @@ void TestBoundingBox()
     char train_label[] = "data/separable_test_2/titanic_train_label.asc";
     int dimension = 2;
     PointSet points = LoadData(train_data, train_label, dimension);
-
+	PrintPoints(points, dimension);
     double **MainTainT = new double*[dimension+1];
     //store those d basis vectors
     for (int i = 0; i < dimension+1; i++)
@@ -215,6 +219,7 @@ void TestSimpleCoreSet()
         MainTainT[i][i] = 1;
     }
     PointSet simpleset = SimpleCoreSet(points, MainTainT, dimension, 0.1);
+	puts("****");
     PrintPoints(simpleset, dimension);
     for (int i = 0; i < dimension+1; i++)
     {
@@ -298,7 +303,7 @@ void TestOneDimensionClassification()
             double cur_distance = MAX_DOUBLE;
             for (int i = 0; i < n; i++)
             {
-                double tmp_dis = Distance(cur_plane, points[i]);
+                double tmp_dis = Distance(cur_plane, points[i], dimension);
                 if (tmp_dis < cur_distance)
                 {
                     cur_distance = tmp_dis;
@@ -326,9 +331,6 @@ void TestDirectionalWidth()
 	PointSet points = LoadData(train_data, train_label, dimension);
 	/*
     //
-
-    
-
     char filename[] = "data/iris_4.txt";
     int dimension = 4;
     PointSet train_points = LoadDataLibSVMFormat(filename, dimension);
@@ -353,12 +355,12 @@ void TestDirectionalWidth()
 
 void TestViolatedMargin(int method)
 {
-    char filename[] = "data/skin_nonskin_3.txt";
-    //char filename[] = "data/svm_guide_4.txt";
-    int dimension = 3;
+    char filename[] = "D:/My work/ConsoleApplication1/ConsoleApplication1/data/Margin_datasetE6D5R5.txt";
+	//char filename[] = "data/poker.t";
+    int dimension = 5;
 	PointSet trainPoints = LoadDataLibSVMFormat(filename, dimension);
     HyperPlane plane(dimension);
-    int k = trainPoints.size() * 0.06;
+    int k = trainPoints.size() * 0.01;
     double epsilon = 0.1;
     double rho = 0.1;
     double delta = 0.5;
@@ -383,13 +385,13 @@ void TestSampling()
 
 void TestDataGenerator()
 {
-	char filename[] = "data/Margin_dataset5E6D5.txt";
+	char filename[] = "data/Margin_datasetE6D5R5.txt";
 
-	int totalNum = 5000000;
+	int totalNum = 1000000;
 	int noiseNum = totalNum * 0.01;
 	int dimension = 5;
 	double margin = 1.0 / dimension;
-	double radius = 1;
+	double radius = 5;
 	GenMarginDataSet(filename, dimension, margin, radius, totalNum, noiseNum);
 
 }

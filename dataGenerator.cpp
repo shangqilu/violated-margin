@@ -98,7 +98,7 @@ void GenMarginPoint(HyperPlane &plane, Point &center, double radius, double marg
 			for (int i = 0; i < plane.d; i++) {
 				p.x[i] = cur.x[i] + (margin - dis) * plane.w[i] / sqrt(denominator);
 			}
-			if (Distance(p, center) < radius) {
+			if (Distance(p, center, plane.d) < radius) {
 				p.y = 1;
 				break;
 			}
@@ -108,7 +108,7 @@ void GenMarginPoint(HyperPlane &plane, Point &center, double radius, double marg
 			for (int i = 0; i < plane.d; i++) {
 				p.x[i] = cur.x[i] - (margin - dis) * plane.w[i] / sqrt(denominator);
 			}
-			if (Distance(p, center) < radius) {
+			if (Distance(p, center, center.dim) < radius) {
 				p.y = -1;
 				break;
 			}
@@ -204,7 +204,7 @@ void GenMarginDataSet(char *filename, int dimension, double margin, double radiu
 			while (1)
 			{
 				GenRandomPointInCircle(dimension, center, radius, cur);
-				if (Distance(plane, cur) > margin) {
+				if (Distance(plane, cur, dimension) > margin) {
 					double value = Dot(plane.w, cur.x, dimension) + plane.b;
 					if (value > 0) {
 						cur.y = 1;
@@ -230,7 +230,7 @@ void GenMarginDataSet(char *filename, int dimension, double margin, double radiu
 		while (1)
 		{
 			GenRandomPointInCircle(dimension, center, radius, cur);
-			if (Distance(plane, cur) > margin) {
+			if (Distance(plane, cur, plane.d) > margin) {
 				double value = Dot(plane.w, cur.x, dimension) + plane.b;
 				if (value > 0) {
 					cur.y = -1;

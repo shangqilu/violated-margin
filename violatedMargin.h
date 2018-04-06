@@ -8,7 +8,8 @@
 
 using namespace std;
 
-
+PointIndex Sampling(int n, double p);
+PointIndex Sampling(PointIndex &points, double p);
 /*
 *   Sampling the point set with probability p
 *   return the sample set
@@ -30,15 +31,15 @@ bool MarginClasification(PointSet &points, HyperPlane &plane, int dimension, dou
 *	with high successful probability no less than 1 - delta
 */
 bool ApproximateViolatedMargin(PointSet &points, HyperPlane &optimal_plane, int dimension,
-                                int k, double epsilon, double rho, double delta, int method);
+			 int k, double epsilon, double rho, double delta, int method);
 
 /*
 *	compute a hyperplane violated no more than k points
 *	and the margin is no less than (1- rho)optimal_margin
 *	with high successful probability no less than 1 - delta
 */
-bool ViolatedMargin(PointSet &points, HyperPlane &optimal_plane, int dimension,
-                     int k, double rho, double delta, int method);
+bool ViolatedMargin(PointSet &points, PointIndex &subSetIndex, HyperPlane &optimal_plane, int dimension,
+	int original_k, int k, double rho, double delta, int method);
 
 
 #endif // VIOLATEDMARGIN_H_INCLUDED

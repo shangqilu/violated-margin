@@ -46,8 +46,7 @@ PointSet LoadDataLibSVMFormat(char* filename, int dimension)
 	PointSet points;
 	FILE *fp = fopen(filename, "r");
 	if (fp == NULL) {
-		puts("cannot open file!");
-		return points;
+		PrintError("cannot open file");
 	}
 	int cnt = 0;
 	while (!feof(fp)) {
@@ -131,10 +130,10 @@ double Dot(double* w, double *x, int dimension)
     return sum;
 }
 
-double Dot(Point &pt1, Point &pt2)
+double Dot(Point &pt1, Point &pt2, int dimension)
 {
     double sum = 0;
-    for (int i = 0; i < pt1.dim; i++)
+	for (int i = 0; i < dimension; i++)
     {
         sum += pt1.x[i]*pt2.x[i];
     }
@@ -151,10 +150,10 @@ double Dot(vector<double> x, vector<double> y, int dimension)
 	return sum;
 }
 
-Point PointMinus(Point &pt1, Point &pt2)
+Point PointMinus(Point &pt1, Point &pt2, int dimension)
 {  
-    Point ans = Point(pt1.dim);
-    for (int i = 0; i < pt1.dim; i++)
+    Point ans = Point(dimension);
+	for (int i = 0; i < dimension; i++)
     {
         ans.x[i] = pt1.x[i] - pt2.x[i];
     }
@@ -176,10 +175,10 @@ void PrintHyperPlane(HyperPlane &plane)
     cout << "b: " << plane.b << endl;
 }
 
-double Distance(HyperPlane &plane, Point &pt)
+double Distance(HyperPlane &plane, Point &pt, int dimension)
 {
     double dis = 0, denominator = 0;
-	for (int i = 0; i < plane.d; i++)
+	for (int i = 0; i < dimension; i++)
     {
         dis += plane.w[i]*pt.x[i];
         denominator += plane.w[i]*plane.w[i];
@@ -188,10 +187,10 @@ double Distance(HyperPlane &plane, Point &pt)
     return fabs(dis)/sqrt(denominator);
 }
 
-double Distance(Point &pt1, Point &pt2)
+double Distance(Point &pt1, Point &pt2, int dimension)
 {
     double dis = 0;
-	for (int i = 0; i < pt1.dim; i++)
+	for (int i = 0; i < dimension; i++)
     {
         dis += (pt1.x[i] - pt2.x[i]) * (pt1.x[i] - pt2.x[i]);
     }
@@ -212,7 +211,7 @@ bool MinimumSeparableDistance(PointSet &points, HyperPlane &plane, double &min_d
         {
             return false;
         }
-        double cur_dis = Distance(plane, points[i]);
+        double cur_dis = Distance(plane, points[i], plane.d);
         if (cur_dis < min_margin ) {
             min_margin = cur_dis;
         }
@@ -240,7 +239,7 @@ bool MinimumViolatedDistance(PointSet &points, HyperPlane &plane, double &min_di
         {
             wrong_num ++;
         }else {
-            double cur_dis = Distance(plane, points[i]);
+            double cur_dis = Distance(plane, points[i], plane.d);
             if (cur_dis < min_margin ) {
                 min_margin = cur_dis;
             }
@@ -259,6 +258,41 @@ bool MinimumViolatedDistance(PointSet &points, HyperPlane &plane, double &min_di
     }
 }
 
+
+bool MinimumSubsetViolatedDistance(PointSet &points, PointIndex &index, HyperPlane &plane, double &min_dis, int k, int &real_k)
+{
+	int dimension = plane.d;
+	int n = index.size();
+	min_dis = 0;
+	//cout << "***" << n << endl;
+	double min_margin = MAX_DOUBLE;
+	int wrong_num = 0;
+	for (int i = 0; i < n; i++)
+	{
+		if (points[index[i]].y*(Dot(plane.w, points[index[i]].x, dimension) + plane.b) < ZERO_ERROR)
+		{
+			wrong_num++;
+		}
+		else {
+			double cur_dis = Distance(plane, points[index[i]], plane.d);
+			if (cur_dis < min_margin) {
+				min_margin = cur_dis;
+			}
+		}
+	}
+	real_k = wrong_num;
+	if (wrong_num > k) {
+		printf("wrong numbers : %d\n", wrong_num);
+		return false;
+	}
+	if (fabs(min_margin - MAX_DOUBLE) < ZERO_ERROR) {
+		return false;
+	}
+	else {
+		min_dis = min_margin;
+		return true;
+	}
+}
 
 
 bool GaussianEquation(double** A, double* b, double* x, int n)
