@@ -119,6 +119,7 @@ bool ViolatedMargin(PointSet &points, PointIndex &subSetIndex, HyperPlane &optim
 					cout << max_margin << endl;
 					PrintHyperPlane(plane);
 					CopyHyperPlane(optimal_plane, plane);
+					break;
 				}  
             }
         }

@@ -15,7 +15,7 @@ PointSet LoadData(char* filename, char* label_filename, int dimension)
     while(getline(f_data, input))
     {
         stringstream line(input);
-        Point newpt = Point(dimension);
+        Point newpt(dimension);
         double tmp = 0;
         int index = 0;
         while(line >> tmp)
@@ -40,10 +40,12 @@ PointSet LoadData(char* filename, char* label_filename, int dimension)
     return trainPointSet;
 }
 
+
 //load data from single file
 PointSet LoadDataLibSVMFormat(char* filename, int dimension)
 {
 	PointSet points;
+	points.reserve(5000000);
 	FILE *fp = fopen(filename, "r");
 	if (fp == NULL) {
 		PrintError("cannot open file");
@@ -62,7 +64,7 @@ PointSet LoadDataLibSVMFormat(char* filename, int dimension)
 				break;
 			}
 		}
-		Point cur_pt = Point(dimension);
+		Point cur_pt(dimension);
 		int label;
 		fscanf(fp, "%d", &label);
 		if (label == 1) {
@@ -89,6 +91,10 @@ PointSet LoadDataLibSVMFormat(char* filename, int dimension)
 		cnt++;
 	}
 	fclose(fp);
+	if (points.size() < points.capacity())
+	{
+		points.shrink_to_fit();
+	}
 	return points;
 }
 
@@ -152,7 +158,7 @@ double Dot(vector<double> x, vector<double> y, int dimension)
 
 Point PointMinus(Point &pt1, Point &pt2, int dimension)
 {  
-    Point ans = Point(dimension);
+    Point ans(dimension);
 	for (int i = 0; i < dimension; i++)
     {
         ans.x[i] = pt1.x[i] - pt2.x[i];

@@ -13,7 +13,7 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
-
+#include <list>
 
 #define __DEBUG__
 #ifdef __DEBUG__
@@ -32,7 +32,7 @@ using namespace std;
 
 const double MAX_DOUBLE = 1e300;
 const double ZERO = 0;
-const double ZERO_ERROR = 1e-10;
+const double ZERO_ERROR = 1e-100;
 
 /*
 *   the structure of a hyperplane
@@ -104,7 +104,7 @@ public:
         dim = obj.dim;
     }
     Point& operator = (const Point & obj) 
-    {
+	{
         if (this == &obj) {
             return *this;
         }
@@ -127,6 +127,10 @@ private:
 *   Points Set
 */
 typedef vector<Point> PointSet;
+/*
+*   Points List
+*/
+typedef list<Point> PointList;
 /*
 *	Point Index
 */

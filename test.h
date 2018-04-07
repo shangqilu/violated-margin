@@ -14,6 +14,8 @@ void TestSimplex();
 
 void TestSimplex2();
 
+void TestSimplexfromFile();
+
 void TestPerceptron();
 
 void TestGaussianEquation();
