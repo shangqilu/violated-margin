@@ -53,86 +53,84 @@ PointSet LoadData_line(char* filename)
 
 	while (readline(fp) != NULL){
 		n_instance++;
-		readline(fp);
-		puts(line);
-		//int inst_max_index = 0;
-		//c_label = strtok(line, " \t\n");
-		//if (c_label == NULL)
-		//{
-		//	exit_input_error(n_instance);
-		//}
+		int inst_max_index = 0;
+		c_label = strtok(line, " \t\n");
+		if (c_label == NULL)
+		{
+			exit_input_error(n_instance);
+		}
 
-		//errno = 0;
-		//int tmp = (int)strtol(c_label, &endptr, 10);
-		//if (endptr == c_label || errno != 0 || *endptr != '\0')
-		//	exit_input_error(n_instance);
+		errno = 0;
+		int tmp = (int)strtol(c_label, &endptr, 10);
+		if (endptr == c_label || errno != 0 || *endptr != '\0')
+			exit_input_error(n_instance);
 
 
-		///*if (tmp != 1 && tmp != -1)
-		//{
-		//puts("label should be 1 or -1");
-		//exit_input_error(n_instance);
-		//}*/
+		/*if (tmp != 1 && tmp != -1)
+		{
+		puts("label should be 1 or -1");
+		exit_input_error(n_instance);
+		}*/
 
-		//while (1)
-		//{
-		//	idx = strtok(NULL, ":");
-		//	val = strtok(NULL, " \t");
+		while (1)
+		{
+			idx = strtok(NULL, ":");
+			val = strtok(NULL, " \t");
 
-		//	if (val == NULL)
-		//		break;
+			if (val == NULL)
+				break;
 
-		//	errno = 0;
-		//	int cur_index = (int)strtol(idx, &endptr, 10);
-		//	if (endptr == idx || errno != 0 || *endptr != '\0' || cur_index <= inst_max_index)
-		//		exit_input_error(n_instance);
-		//	else
-		//		inst_max_index = cur_index;
+			errno = 0;
+			int cur_index = (int)strtol(idx, &endptr, 10);
+			if (endptr == idx || errno != 0 || *endptr != '\0' || cur_index <= inst_max_index)
+				exit_input_error(n_instance);
+			else
+				inst_max_index = cur_index;
 
-		//	errno = 0;
-		//	double cur_val = strtod(val, &endptr);
-		//	if (endptr == val || errno != 0 || (*endptr != '\0' && !isspace(*endptr)))
-		//		exit_input_error(n_instance);
-		//}
-		//if (n_features < inst_max_index) {
-		//	n_features = inst_max_index;
-		//}
+			errno = 0;
+			double cur_val = strtod(val, &endptr);
+			if (endptr == val || errno != 0 || (*endptr != '\0' && !isspace(*endptr)))
+				exit_input_error(n_instance);
+		}
+		if (n_features < inst_max_index) {
+			n_features = inst_max_index;
+		}
 	}
 	rewind(fp);
 	cout << n_instance << " ";
 	cout << n_features << endl;
 	points.reserve(n_instance);
 
-	//for (int i = 0; i < n_instance; i++)
-	//{
-	//	//Point cur_pt(n_features);
-	//	readline(fp);
-	//	c_label = strtok(line, " \t\n");
+	for (int i = 0; i < n_instance; i++)
+	{
+		//Point cur_pt(n_features);
+		readline(fp);
+		c_label = strtok(line, " \t\n");
 
-	//	int label = (int)strtol(c_label, &endptr, 10);
+		int label = (int)strtol(c_label, &endptr, 10);
 
-	//	/*if (label == 1) {
-	//	cur_pt.y = 1;
-	//	}
-	//	else {
-	//	cur_pt.y = -1;
-	//	}*/
-	//	while (1)
-	//	{
-	//		idx = strtok(NULL, ":");
-	//		val = strtok(NULL, " \t");
+		/*if (label == 1) {
+		cur_pt.y = 1;
+		}
+		else {
+		cur_pt.y = -1;
+		}*/
+		while (1)
+		{
+			idx = strtok(NULL, ":");
+			val = strtok(NULL, " \t");
 
-	//		if (val == NULL)
-	//			break;
+			if (val == NULL)
+				break;
 
-	//		int cur_index = (int)strtol(idx, &endptr, 10);
-	//		double cur_val = strtod(val, &endptr);
+			int cur_index = (int)strtol(idx, &endptr, 10);
+			double cur_val = strtod(val, &endptr);
 
-	//		cout << cur_index << " " << cur_val << " " << i << endl;
-	//		//cur_pt.x[cur_index-1] = cur_val;
-	//	}
-	//	//points.push_back(cur_pt);
-	//}
+			cout << cur_index << " " << cur_val << " " << i << endl;
+			//cur_pt.x[cur_index-1] = cur_val;
+		}
+		//points.push_back(cur_pt);
+	}
 
 	free(line);
 	fclose(fp);
@@ -162,5 +160,13 @@ int main(int nargs, char **args)
 
 	char filename[] = "data/iris_4.txt";
 	LoadData_line(filename);
+	/*FILE *fp = fopen(filename, "r");
+	char line[1024];
+	while (fgets(line, 1024, fp))
+	{
+		puts(line);
+	}
+	fclose(fp);*/
+
 	return 0;
 }
