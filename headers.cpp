@@ -91,10 +91,6 @@ PointSet LoadDataLibSVMFormat(char* filename, int dimension)
 		cnt++;
 	}
 	fclose(fp);
-	if (points.size() < points.capacity())
-	{
-		points.shrink_to_fit();
-	}
 	return points;
 }
 
