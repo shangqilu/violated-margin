@@ -289,8 +289,7 @@ void PrintBoundingBox(BoundingBox box);
 *       dimension: current dimension
 *       realDimension: the real dimension of points and bounding box
 */
-bool RecursionMinimumBoudingBox(PointSet &points, BoundingBox &curbox, double **MainTainT, 
-	int dimension, int realDimension);
+bool RecursionMinimumBoudingBox(PointSet &points, BoundingBox &curbox, double **MainTainT, int dimension);
 
 /*
 *   Compute the two approximate diameter of a point set
@@ -305,32 +304,32 @@ bool TwoApproxiDiameter(PointSet &points, int dimension, int &s, int &t);
 /*
 *   compute a simple core set with size O(1/epsilon^d-1)
 */
-PointSet SimpleCoreSet(PointSet &points, double **MainTainT, int dimension, double epsilon);
+PointSet SimpleCoreSet(PointSet &points, double **MainTainT, double epsilon);
 
 /*
 *   compute a smaller core set with size O(1/epsilon^(d-1)/2)
 */
-PointSet SmallerCoreSet(PointSet &points, PointSet directionPoints, int dimension, double epsilon);
+PointSet SmallerCoreSet(PointSet &points, PointSet &directionPoints, double epsilon);
 
 /*
 *   Compute a hyperplane with a (1-rho)approximation margin using Directional width algorithm
 */
-bool DirectionalWidth(PointSet &points, HyperPlane &plane, int dimension, double rho);
+bool DirectionalWidth(PointSet &points, HyperPlane &plane);
 
-bool DirectionalWidth(PointSet &points, HyperPlane &plane, int dimension, double rho,
-	PointSet &coresetDirections, PointSet &classifyDirections);
+bool DirectionalWidth(PointSet &points, HyperPlane &plane,
+		PointSet &coresetDirections, PointSet &classifyDirections);
 
 /*
 *   Given a direction, compute a hyperplane with largest margin in one dimension
 */
-bool OneDimensionClassification(PointSet &points, HyperPlane &cur_plane, Point direction, double radius);
+bool OneDimensionClassification(PointSet &points, HyperPlane &cur_plane, Point &direction, double radius);
 
 /*
 *   recursively compute directions
 *   store them in points set
 */
-void ComputingDirections(PointSet &points, double*angles, int curDimension, int realDimension, 
-	double delta, double radius);
+void ComputingDirections(PointSet &points, double*angles, int curDimension, 
+		double delta, double radius, double full_angle);
 
 
 #endif // DIRECTIONALWIDTH_H_INCLUDED

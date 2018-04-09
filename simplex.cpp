@@ -1,5 +1,7 @@
 #include "simplex.h"
 #include "headers.h"
+#include "globalVar.h"
+#include "tools.h"
 
 LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int n)
 {
@@ -355,17 +357,17 @@ void PrintSimplexNode(Simplex_Node &node)
 
 //the direction range from 1 to d means d directions along the axes
 //if direction = 0, there are no direction constraints
-bool OneDirectionLPClassification(PointSet &trainPoints, HyperPlane &plane, int dimension, int direction)
+bool OneDirectionLPClassification(PointSet &trainPoints, HyperPlane &plane, int direction)
 {
     int number_constraints, number_variables;
-    number_variables = 2*(dimension+1)+1;
+	number_variables = 2 * (Dim + 1) + 1;
     if (direction == 0)   //simple LP, no specific direction
     {
         number_constraints = trainPoints.size();
     }
     else
     {
-        number_constraints = trainPoints.size() + 2*dimension;
+		number_constraints = trainPoints.size() + 2 * Dim;
     }
     double **input_A, *input_b, *input_C;
     input_A = new double*[number_constraints];
@@ -385,21 +387,21 @@ bool OneDirectionLPClassification(PointSet &trainPoints, HyperPlane &plane, int 
     }
     for (int i = 0; i < n; i++)
     {
-        int cur_label = trainPoints[i].y;//label: 1 or -1
-        for (int j = 0; j < dimension; j++)
+        int cur_label = trainPoints[i]->y;//label: 1 or -1
+		for (int j = 0; j < Dim; j++)
         {
-            input_A[i][2*j] = - trainPoints[i].x[j] * cur_label;
-            input_A[i][2*j+1] = trainPoints[i].x[j] * cur_label;
+            input_A[i][2*j] = - trainPoints[i]->x[j] * cur_label;
+            input_A[i][2*j+1] = trainPoints[i]->x[j] * cur_label;
         }
-        input_A[i][2*dimension] = -1 * cur_label;
-        input_A[i][2*dimension+1] = 1 * cur_label;
-        input_A[i][2*dimension+2] = 1 ;//always 1 in last dimension
+		input_A[i][2 * Dim] = -1 * cur_label;
+		input_A[i][2 * Dim + 1] = 1 * cur_label;
+		input_A[i][2 * Dim + 2] = 1;//always 1 in last dimension
         input_b[i] = 0;
     }
     int cur_row = n;
     if(direction > 0)   //add constraints information about w
     {
-        for (int j = 0; j < dimension; j++) {
+		for (int j = 0; j < Dim; j++) {
             if (j == direction-1) {
                 input_A[cur_row][2*j] = 1;// w_j<=1
                 input_A[cur_row][2*j+1] = -1;
@@ -426,17 +428,15 @@ bool OneDirectionLPClassification(PointSet &trainPoints, HyperPlane &plane, int 
         input_C[j] = 0;
     }
     input_C[number_variables-1] = 1;
-    //cout << number_constraints << endl;
-    //Simplex_Node node = Simplex_Node(input_A, input_b, input_C, number_constraints, number_variables);
-    //PrintSimplexNode(node);
+    
     LPresult result = Simplex(input_A, input_b, input_C, number_constraints, number_variables);
 
     for (int i = 0; i < number_constraints; i++) {
-        delete input_A[i];
+        delete []input_A[i];
     }
-    delete input_A;
-    delete input_b;
-    delete input_C;
+    delete []input_A;
+    delete []input_b;
+    delete []input_C;
 
 
     if (result.flag == 0) {
@@ -444,21 +444,21 @@ bool OneDirectionLPClassification(PointSet &trainPoints, HyperPlane &plane, int 
     }
     //printf("number of constraints: %d\n", number_constraints);
     //PrintLPresult(result, number_variables);
-    for (int j = 0; j < dimension; j++) {
+	for (int j = 0; j < Dim; j++) {
         plane.w[j] = result.x[2*j]-result.x[2*j+1];
     }
-    plane.b = result.x[2*dimension]-result.x[2*dimension+1];
+	plane.b = result.x[2 * Dim] - result.x[2 * Dim + 1];
     return true;
 }
 
 
-bool LPclassification(PointSet &trainPoints, HyperPlane &plane, int dimension)
+bool LPclassification(PointSet &trainPoints, HyperPlane &plane)
 {
-    HyperPlane cur_plane(dimension);
+    HyperPlane cur_plane(Dim);
     double max_margin = 0;
     int flag = 0;
-    for (int j = 0; j < dimension; j++) {
-        bool found = OneDirectionLPClassification(trainPoints, cur_plane, dimension, j+1);
+	for (int j = 0; j < Dim; j++) {
+		bool found = OneDirectionLPClassification(trainPoints, cur_plane, j + 1);
         if (found) {
             flag = 1;
             double cur_margin = 0;
@@ -471,11 +471,11 @@ bool LPclassification(PointSet &trainPoints, HyperPlane &plane, int dimension)
 
             }
             if (separable && cur_margin > max_margin) {
-                printf("find a solution in dimension %d with margin %lf\n", j, cur_margin);
-                PrintHyperPlane(cur_plane);
+                //printf("find a solution in dimension %d with margin %lf\n", j, cur_margin);
+                //PrintHyperPlane(cur_plane);
                 max_margin = cur_margin;
                 
-                for (int j = 0; j < dimension; j++) {
+				for (int j = 0; j < Dim; j++) {
                     plane.w[j] = cur_plane.w[j];
                 }
                 plane.b = cur_plane.b;

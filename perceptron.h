@@ -2,7 +2,6 @@
 
 #define __PERCEPTRON_H__
 #include "headers.h"
-#include <list>
 
 /*
 *   the max iterations in simple perceptron algorithm
@@ -15,15 +14,13 @@ const int MaxIterations = 1000000;
 void SimplePerceptron(PointSet &trainPoints, int dimension);
 
 /*
-*   compute a hyperplane with margin at least (1-epsilon)y_guess if y_guess < y_opt
-*   R and y_min is the largest and smallest distance between a point 
-*	from Points Set to origin in d+1 dimension
+*   compute a hyperplane with margin at least y_guess if y_guess < y_opt
 */
-bool BallMarginPerceptron(PointList &pointlist, HyperPlane &plane, int dimension, double y_guess, double R, double y_min);
+bool BallMarginPerceptron(PointList &pointlist, HyperPlane &plane, double y_guess);
 
 /*
 *   compute a separation hyperplane with margin at least (1-rho)*y_opt
 */
-bool IncreMarginPerceptron(PointSet &trainPoints, HyperPlane &plane, int dimension, double rho);
+bool IncreMarginPerceptron(PointSet &trainPoints, HyperPlane &plane);
 
 #endif // PERCEPTRON_H

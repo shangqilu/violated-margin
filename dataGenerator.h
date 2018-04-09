@@ -16,7 +16,7 @@ double GenGaussianRandom();
 
 void GenRandomPoint(double rangeStart, double rangeEnd, Point &p);
 
-void GenRandomPointInCircle(int dimension, Point &center, double radius, Point &p);
+void GenRandomPointInCircle(Point &center, double radius, Point &p);
 
 void GenRandomHyperPlane(double rangeStart, double rangeEnd, HyperPlane &plane);
 
@@ -26,8 +26,8 @@ void GenTwoDimensinoGridDataSet(char *filename, int totalNum);
 
 void GenMarginPoint(HyperPlane &plane, Point &center, double radius, double margin, Point &p);
 
-void GenMarginDataSet(char *filename, int dimension, double margin, double radius,
-	int totalNum, int noiseNum);
+void GenMarginDataSet(char *filename, double margin, double radius,
+			int totalNum, int noiseNum);
 
 
 

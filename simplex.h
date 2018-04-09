@@ -142,16 +142,18 @@ void Pivot(Simplex_Node &node, int leaving, int entering);
 bool Initial_Simplex(Simplex_Node &node, int &num);
 
 void PrintLPresult(LPresult &result, int dimension);
+
+
 void PrintSimplexNode(Simplex_Node &node);
 
 /*
 *   find the hyperplane with largest gap
 *   along the direction of the i th dimension coordinate axis
 */
-bool OneDirectionLPClassification(PointSet &trainPoints, HyperPlane &plane, int dimension, int direction);
+bool OneDirectionLPClassification(PointSet &trainPoints, HyperPlane &plane, int direction);
 
 /*
-*   compute the 1/sqrt(dimension)-approximation hyperplane through liner programming
+*   compute a 1/sqrt(dimension)-approximation hyperplane through liner programming
 */
-bool LPclassification(PointSet &trainPoints, HyperPlane &plane, int dimension);
+bool LPclassification(PointSet &trainPoints, HyperPlane &plane);
 #endif // __SIMPLEX_H__

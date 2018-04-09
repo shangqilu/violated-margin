@@ -4,7 +4,6 @@
 #include "headers.h"
 #include "perceptron.h"
 #include "simplex.h"
-#include "directionalWidth.h"
 #include "violatedMargin.h"
 #include "dataGenerator.h"
 using namespace std;

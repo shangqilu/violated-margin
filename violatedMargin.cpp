@@ -1,51 +1,43 @@
 #include "violatedMargin.h"
+#include "tools.h"
+#include "globalVar.h"
+#include "perceptron.h"
+#include "simplex.h"
+#include "directionalWidth.h"
 
-
-//return a hyper-plane violated no more than (1+epsilon)*k points
-//and the margin is no less than (1- rho)optimal_margin
-//with high successful probability no less than 1 - delta
-bool ApproximateViolatedMargin(PointSet &points, HyperPlane &optimal_plane, int dimension,
-                               int k, double epsilon, double rho, double delta, int method)
+bool ApproximationViolatedMargin(PointSet &points, HyperPlane &optimal_plane)
 {
     int n = points.size();
     printf("Original Set size %d ...\n", n);
-
-    //similar to 1+epsilon/3
-    double temp = epsilon/log(1+epsilon);
+	
+	/*
+    *	Similar to k_prime = 1 + epsilon/3 in the book.
+	*	when k_prime = (epsilon/log(1+epsilon)) * k * p,
+	*	the sampling probability is smaller in theory.
+	*/
+    double temp = Epsilon/log(1+Epsilon);
     //sampling probability
-    double p = 1.0/(temp*log(temp)-temp+1)*(dimension*log(n)-LogFactorial(dimension)+log(1/delta))/k;
+    double p = 1.0/(temp*log(temp)-temp+1)*(Dim*log(n)-LogFactorial(Dim)+log(1/Delta))/K;
     cout << "sample probability p: " << p << endl;
 
-    //make sure in the sample set the plane
-    //violating no more than k_prime points
-    int k_prime = temp * k * p;
-    cout << "k: " << k << " k_prime: " << k_prime << endl;
-    if (k_prime > k)
+    //in the sample set the separation plane
+    //shoud violate no more than k_prime points
+    int k_prime = temp * K * p;
+    cout << "k: " << K << " k_prime: " << k_prime << endl;
+    if (k_prime > K)
     {
-        k_prime = k;
+        k_prime = K;
     }
-    cout << "k: " << k << " k_prime: " << k_prime << endl;
+    cout << "k: " << K << " k_prime: " << k_prime << endl;
 	PointIndex subSetIndex = Sampling(n, p);
     
 	printf("n_prime: %d ...\n", subSetIndex.size());
 
-	bool found = ViolatedMargin(points, subSetIndex, optimal_plane, dimension, k, k_prime, rho, delta, method);
+	bool found = ViolatedMargin(points, subSetIndex, optimal_plane, k_prime);
 
     if (found)
     {
-        double margin = 0;
-        int real_k = 0;
-        bool k_separable = MinimumViolatedDistance(points, optimal_plane, margin, (1+epsilon)*k, real_k);
-        if (k_separable)
-        {
-            puts("Separating original set correctly");
-            printf("real_k: %d, margin: %lf, error rate: %lf\n", real_k, margin, 1.0*real_k/n);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+		return true;
     } else {
         return false;
     }
@@ -54,68 +46,86 @@ bool ApproximateViolatedMargin(PointSet &points, HyperPlane &optimal_plane, int 
 
 
 
-bool ViolatedMargin(PointSet &points, PointIndex &subSetIndex, HyperPlane &optimal_plane, int dimension,
-		int original_k, int k, double rho, double delta, int method)
+bool ViolatedMargin(PointSet &points, PointIndex &subSetIndex, HyperPlane &optimal_plane, int k_prime)
 {
-    //repeating k^d * exp^d / d^d ln(1/delta) times
+    //should repeat k^d * exp^d / d^d ln(1/delta) times in theory
+	//the failing probability delta is set to 0.5 
+	long long times = (long long)(pow(k_prime, Dim) * exp(Dim)
+					/ pow(1.0*Dim, Dim) * log(1 / Delta));
+    printf("need repeating times in theory: %lld \n", times);
+    
+	double max_margin = 0;
+	int real_k;
+	int realMaxIterations = 5000;
+	int curMax = 1000;
+	int find_cnt = 0;
+	int max_cnt = 10;
+    bool found_solution = false;
 
-    long long times = (long long)(pow(k, dimension) * exp(dimension)
-                                /pow(1.0*dimension, dimension) * log(1/delta));
-    printf("need repeating times: %lld \n", times);
-    double max_margin = 0;
-
-    bool flag = false;
 	PointSet coresetDirections;
 	PointSet classifyDirections;
-	if (method == 2){
+	if (Method == 2) {
 		//compute those directions set the angle with epsilon
 		//compute direction set for constructing CoreSet
-		double alpha = 1.0 / (dimension*(4 * dimension + 1));
-		double single_algle = sqrt(rho*alpha / 4);
-		double radius = sqrt(dimension) + 1;
+		double alpha = 1.0 / (Dim*(4 * Dim + 1));
+		double single_algle = sqrt(Rho*alpha / 4);
+		double radius = sqrt(Dim) + 1;
 
-		double *angles = new double[dimension - 1];
+		double *angles = new double[Dim - 1];
 		puts("computing coreset directions...");
-		ComputingDirections(coresetDirections, angles, 1, dimension, 0.2, radius);
-		printf("there are %d directions", coresetDirections.size());
+		ComputingDirections(coresetDirections, angles, 1, 0.2, radius, 2*M_PI);
+		printf("there are %d coreset directions\n", coresetDirections.size());
 
-		ComputingDirections(classifyDirections, angles, 1, dimension, 0.2, 1);
-		printf("there are %d directions", classifyDirections.size());
+		ComputingDirections(classifyDirections, angles, 1, 0.2, 1, M_PI);
+		printf("there are %d classifying directions\n", classifyDirections.size());
 		delete[]angles;
 	}
 
 
-    for (int curtime = 0; curtime < 5000; curtime++)
+
+
+
+	for (int curtime = 0; curtime < curMax; curtime++)
     {
-        printf("Current repeating time: %d\n", curtime);
-        double p = 1.0*dimension/k;
-		PointIndex subsubIndex = Sampling(subSetIndex, p);
-		PointSet subpoints;
-		for (int i = 0; i < subsubIndex.size(); i++) {
-			subpoints.push_back(points[subsubIndex[i]]);
+		if (curtime >= realMaxIterations) {
+			break;
 		}
-		int n = subpoints.size();
-        printf("Sub Set size %d ...\n", n);
-		if (n < 2) {
+        printf("Current repeating time: %d\n", curtime);
+        double p = 1.0 * Dim / k_prime;
+		PointIndex subsubIndex = Sampling(subSetIndex, p);
+		PointSet subsubPoints;
+		for (int i = 0; i < subsubIndex.size(); i++) {
+			subsubPoints.push_back(points[subsubIndex[i]]);
+		}
+		int subsubn = subsubPoints.size();
+		printf("Sub Set size %d ...\n", subsubn);
+		if (subsubn < 2) {
 			continue;
 		}
-        HyperPlane plane(dimension);
-        bool found = MarginClasification(subpoints, plane, dimension, rho, method, coresetDirections, classifyDirections);
+        HyperPlane plane(Dim);
+		bool found = MarginClasification(subsubPoints, plane, coresetDirections, classifyDirections);
         if (found)
         {
             //test whether separable in the sub set
             double cur_dis = 0;
-            int real_k = 0;
-			bool k_separable = MinimumSubsetViolatedDistance(points,subSetIndex, plane, cur_dis, k, real_k);
+            real_k = 0;
+			bool k_separable = MinimumSubsetViolatedDistance(points,subSetIndex, plane, cur_dis, k_prime, real_k);
             if (k_separable)
             {
-				printf("a solution in the sub set \n");
-				bool correct = MinimumViolatedDistance(points, plane, cur_dis, original_k, real_k);
+				//if we can find a solution in the subset easily,  
+				//increase the maxiterations for a better solution.
+				curMax = curMax * 2;
+				if (curMax > realMaxIterations) curMax = realMaxIterations;
+				//printf("find a solution in the sub set \n");
+				//test whether separable in the original set
+				bool correct = MinimumViolatedDistance(points, plane, cur_dis, (1+Epsilon)*K, real_k);
 				if (correct && cur_dis > max_margin) {
-					flag = true;
+					find_cnt++;
+					if (find_cnt >= max_cnt) break;
+					found_solution = true;
 					max_margin = cur_dis;
 					//optimal_plane = plane;
-					printf("a solution in the original set ");
+					printf("a solution in the original set\n");
 					cout << max_margin << endl;
 					PrintHyperPlane(plane);
 					CopyHyperPlane(optimal_plane, plane);
@@ -124,7 +134,24 @@ bool ViolatedMargin(PointSet &points, PointIndex &subSetIndex, HyperPlane &optim
             }
         }
     }
-    if (flag)
+
+	if (Method == 2) {
+		//delete points
+		int num = coresetDirections.size();
+		for (int i = 0; i < num; i++) {
+			delete[]coresetDirections[i]->x;
+			delete(coresetDirections[i]);
+			coresetDirections[i] = NULL;
+		}
+		num = classifyDirections.size();
+		for (int i = 0; i < num; i++) {
+			delete[]classifyDirections[i]->x;
+			delete(classifyDirections[i]);
+			classifyDirections[i] = NULL;
+		}
+
+	}
+	if (found_solution)
     {
         return true;
     }
@@ -178,47 +205,26 @@ PointIndex Sampling(PointIndex &points, double p)
 
 }
 
-PointSet Sampling(PointSet &points, int dimension, double p)
-{
-    //srand(time(NULL));   //in reality we should use time seed
-    if (p > 1)
-    {
-        puts("p>1");
-        return points;
-    }
-    int n = points.size();
-    PointSet newPoints;
-    for (int i = 0; i < n; i++)
-    {
-        double r = ((double)rand())/RAND_MAX;
-        //printf("%d %lf\n", i, r);
-        if (r < p)
-        {
-            newPoints.push_back(points[i]);
-        }
-    }
-    return newPoints;
-}
 
 
-bool MarginClasification(PointSet &points, HyperPlane &plane, int dimension, double rho, 
-	int method, PointSet &coresetDirections, PointSet &classifyDirections)
+
+inline bool MarginClasification(PointSet &points, HyperPlane &plane,
+				PointSet &coresetDirections, PointSet &classifyDirections)
 {
-    if (method == 0)
+    if (Method == 0)
     {
-        return IncreMarginPerceptron(points, plane, dimension, rho);
+		return LPclassification(points, plane);
     }
-    else if (method == 1)
+    else if (Method == 1)
     {
-        return LPclassification(points, plane, dimension);
+		return IncreMarginPerceptron(points, plane);
     }
-    else if (method == 2)
+	else if (Method == 2) {
+		return DirectionalWidth(points, plane, coresetDirections, classifyDirections);
+	}
+	else
     {
-		return DirectionalWidth(points, plane, dimension, rho, coresetDirections, classifyDirections);
-    }
-    else
-    {
-        puts("choose method from 0 to 2");
+        puts("should choose method from 0 to 2");
         return false;
     }
 }
