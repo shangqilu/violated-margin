@@ -41,7 +41,14 @@ extern double Delta;
 */
 extern int Method;
 
-
+/*
+*  The chosen radius of dataset.
+*/
+extern double Radius;
+/*
+*  The chosen margin of dataset.
+*/
+extern double Margin;
 
 
 

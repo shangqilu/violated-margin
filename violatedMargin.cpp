@@ -56,8 +56,8 @@ bool ViolatedMargin(PointSet &points, PointIndex &subSetIndex, HyperPlane &optim
     
 	double max_margin = 0;
 	int real_k;
-	int realMaxIterations = 5000;
-	int curMax = 1000;
+	int realMaxIterations = 500000;
+	int curMax = 10000;
 	int find_cnt = 0;
 	int max_cnt = 10;
     bool found_solution = false;
@@ -86,12 +86,16 @@ bool ViolatedMargin(PointSet &points, PointIndex &subSetIndex, HyperPlane &optim
 
 
 	for (int curtime = 0; curtime < curMax; curtime++)
-    {
+	{
 		if (curtime >= realMaxIterations) {
 			break;
 		}
-        printf("Current repeating time: %d\n", curtime);
-        double p = 1.0 * Dim / k_prime;
+		printf("Current repeating time: %d\n", curtime);
+		double p = 1.0  / k_prime; //
+		if (k_prime * 1.0 / K < 0.8) 
+		{
+			p = p * Dim;
+		}
 		PointIndex subsubIndex = Sampling(subSetIndex, p);
 		PointSet subsubPoints;
 		for (int i = 0; i < subsubIndex.size(); i++) {
@@ -109,7 +113,9 @@ bool ViolatedMargin(PointSet &points, PointIndex &subSetIndex, HyperPlane &optim
             //test whether separable in the sub set
             double cur_dis = 0;
             real_k = 0;
-			bool k_separable = MinimumSubsetViolatedDistance(points,subSetIndex, plane, cur_dis, k_prime, real_k);
+            int permitted_k = k_prime;
+            if (k_prime == K) permitted_k = (1 + Epsilon) * k_prime;
+			bool k_separable = MinimumSubsetViolatedDistance(points,subSetIndex, plane, cur_dis, permitted_k, real_k);
             if (k_separable)
             {
 				//if we can find a solution in the subset easily,  
@@ -125,7 +131,7 @@ bool ViolatedMargin(PointSet &points, PointIndex &subSetIndex, HyperPlane &optim
 					found_solution = true;
 					max_margin = cur_dis;
 					//optimal_plane = plane;
-					printf("a solution in the original set\n");
+					printf("a solution in the original set with margin: ");
 					cout << max_margin << endl;
 					PrintHyperPlane(plane);
 					CopyHyperPlane(optimal_plane, plane);

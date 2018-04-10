@@ -139,7 +139,7 @@ void Pivot(Simplex_Node &node, int leaving, int entering);
 *       return a Simplex node with the initial basic solution feasible
 *   else return false
 */
-bool Initial_Simplex(Simplex_Node &node, int &num);
+bool Initial_Simplex(Simplex_Node &node);
 
 void PrintLPresult(LPresult &result, int dimension);
 

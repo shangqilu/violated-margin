@@ -4,7 +4,8 @@
 #include "violatedMargin.h"
 #include "dataGenerator.h"
 #include <errno.h>
-
+#include "simplex.h"
+#include "test.h"
 using namespace std;
 
 static char *line = NULL;
@@ -50,7 +51,7 @@ void LoadDataLibSVMFormat(int n, int dimension, char* filename, PointSet &points
 
 	while (readline(fp) != NULL){
 		n_instance++;
-		if (n_instance % 10000 == 0) {
+		if (n_instance % 100000 == 0) {
 			printf("%d\n", n_instance);
 		}
 		int inst_max_index = 0;
@@ -65,16 +66,15 @@ void LoadDataLibSVMFormat(int n, int dimension, char* filename, PointSet &points
 		if (endptr == c_label || errno != 0 || *endptr != '\0')
 			exit_input_error(n_instance);
 
-		if (cur_label != -1 && cur_label != 1) {
+		/*if (cur_label != -1 && cur_label != 1) {
 			printf("label should be -1 or 1 !\n");
 			exit_input_error(n_instance);
-		}
+		}*/
 		//cout << cur_label << endl;
 		double *x = new double[dimension];
 		Point *curPt = new Point(dimension, x);
-		if (n_instance > 245057) {
-			cout << n_instance << endl;
-		}
+	
+
 		if (cur_label == 1) {
 			positive_label = true;
 			curPt->y = 1;
@@ -143,19 +143,22 @@ void Usage()
 	printf(
 	"k violation margin algorithm\n"
 	"Options:\n"
-	"-n {integer} the number of points\n"
-	"-d {integer} the dimensionlity of points\n"
-	"-p {double}  the largest classification error rate accepted\n" 
-	"			  or the percent of noise points\n"
-	"-f {string}  the full path of training file name\n"
-	"			  or generated dataset file name\n"
-	"-e {double}  epsilon: the approximation for error rate (default 0.1)\n"
-	"-r {double}  rho: the approximation for margin (default 0.1)\n"
-	"-m {integer}  the choosen method (default 0)\n"
+	"-n {integer}	the number of points\n"
+	"-d {integer}	the dimensionlity of points\n"
+	"-p {double}	the largest classification error rate accepted\n" 
+	"				or the percent of noise points\n"
+	"-f {string}	the full path of training file name\n"
+	"				or generated dataset file name\n"
+	"-e {double}	epsilon: the approximation for error rate (default 0.1)\n"
+	"-r {double}	rho: the approximation for margin (default 0.1)\n"
+	"-R {double }	the radius of the dataset\n"
+	"-y {integer}	the margin of the dataset\n"
+	"-m {integer}	the choosen method (default 0)\n"
 	"   0:  the linear programming algorithm\n"
 	"   1:  the perceptron algorithm\n" 
 	"   2:  the directional width algorithm\n"
-	"   3:  generating data points\n"
+	"   3:  generating margin data points\n"
+	"   4:  generating grid data points\n"
 	);
 
 }
@@ -177,7 +180,8 @@ void WritePlanetoFile(char *filename, HyperPlane &plane, double margin, int real
 }
 
 
-void InitializeGlobalVariables(int n, int d, double p, int k, double epsilon, double rho, int method)
+void InitializeGlobalVariables(int n, int d, double p, int k, double epsilon, 
+					double rho, int method, double R, double y)
 {
 	N = n;
 	Dim = d;
@@ -186,6 +190,8 @@ void InitializeGlobalVariables(int n, int d, double p, int k, double epsilon, do
 	Epsilon = epsilon;
 	Rho = rho;
 	Method = method;
+	Radius = R;
+	Margin = y;
 }
 
 
@@ -196,7 +202,8 @@ int main(int argc, char **argv)
 	srand(time(NULL));
 #endif // __DEBUG__
 
-	srand(time(NULL));
+	srand(time(NULL));	
+	
 	//for train
 	
 
@@ -209,6 +216,10 @@ int main(int argc, char **argv)
 	char file_name[200]; 
 	char model_file_name[200];
 	bool flag = true;
+
+
+	double R = 1;
+	double y = 0.1;
 
 	//parse command line
 	int i;
@@ -263,8 +274,20 @@ int main(int argc, char **argv)
 			}
 			case 'm' :{
 				method = atoi(argv[i]);
-				if (method < 0 || method > 3) flag = false;
+				if (method < 0 || method > 4) flag = false;
 				printf("m: %d\n", method);
+				break;
+			}
+			case 'R':{
+				R = atof(argv[i]);
+				if (R < 0) flag = false;
+				printf("R: %lf\n", R);
+				break;
+			}
+			case 'y':{
+				y = atof(argv[i]);
+				if (y < 0) flag = false;
+				printf("y: %lf\n", y);
 				break;
 			}
 			default: {
@@ -280,6 +303,12 @@ int main(int argc, char **argv)
 		flag = false;
 		printf("=========================================\n");
 		printf("You should indicate -n, -d, -p, -f at least.\n");
+	}
+	if (y >= R)
+	{
+		flag = false;
+		printf("=========================================\n");
+		printf("margin should less than radius\n");
 	}
 	if (!flag) {
 		printf("=========================================\n");
@@ -301,11 +330,16 @@ int main(int argc, char **argv)
 	}
 
 	//initialize global variables
-	InitializeGlobalVariables(n, d, p, k, epsilon, rho, method);
+	InitializeGlobalVariables(n, d, p, k, epsilon, rho, method, R, y);
 	
 	if (method == 3) {
-		printf("Generating points\n");
-		GenMarginDataSet(file_name, 1.0 / d, 1, n, k);
+		printf("Generating margin points\n");
+		GenMarginDataSet(file_name, Margin, Radius, n, k);
+		return 0;
+	} else if (method == 4) {
+		Dim = 2;
+		printf("Generating two dimension grid points\n");
+		GenTwoDimensinoGridDataSet(file_name, n);
 		return 0;
 	}
 
@@ -335,7 +369,7 @@ int main(int argc, char **argv)
 		WritePlanetoFile(model_file_name, plane, margin, real_k, real_k*1.0 / N);
 	}
 	else {
-		printf("Failed to find a solution");
+		printf("Failed to find a solution\n");
 	}
 
 

@@ -124,7 +124,7 @@ bool BallMarginPerceptron(PointList &pointlist, HyperPlane &plane, double y_gues
 		return false;
 	}
 	else {
-		PrintHyperPlane(plane);
+		//PrintHyperPlane(plane);
 		return true;
 	}
 

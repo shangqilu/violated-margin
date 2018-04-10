@@ -7,46 +7,31 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
 {
     //puts("RunSimplex...");
     Simplex_Node node(input_A, input_b, input_C, m, n);
-    LPresult result = LPresult(n);
-	int num;
-    bool re = Initial_Simplex(node, num);
-	/*if (num == 100000) {
-		char filename[] = "data/cycleLP.txt";
-		FILE *fp = fopen(filename, "w");
-		for (int i = 0; i < m; i++) {
-			for (int j = 0; j < n; j++)
-			{
-				fprintf(fp, "%lf ", input_A[i][j]);
-			}
-			fprintf(fp, "\n");
-		}
-		for (int i = 0; i < m; i++) fprintf(fp, "%lf ", input_b[i]);
-		fprintf(fp, "\n");
-		for (int i = 0; i < n; i++) fprintf(fp, "%lf ", input_C[i]);
-		fprintf(fp, "\n");
-		exit(0);
-	}*/
-	//puts("after initial");
+    LPresult result(n);
+	//PrintSimplexNode(node);
+	
+	bool re = Initial_Simplex(node);
     if (!re) {
         //puts("It is infeasible in initial simplex!");
         return result;
     }
-
+	int num = 0;
     while(1){
+		num++;
+		if (num == 10000) {
+			return result;
+		}
         //choose the variable with the smallest index
         //puts("pivoting...");
         //PrintSimplexNode(node);
         int min_index = n + m; //non basic variable starting form m
         int entering = n + m;
         for (int j = 0; j < n; j++) {
-			if ((node.C[j] - 0)> ZERO) {
-                //puts("can not stop");
-                //if (min_index > node.N[j]) {
-                    //cout << "asdf" << endl;
+			if (node.C[j] > ZERO) {
+                if (min_index > node.N[j]) {
                     min_index = node.N[j];
                     entering = j;
-				//}
-					break;
+				}
             }
         }
         //printf("choosing entering: %d %d\n", entering, min_index);
@@ -60,7 +45,7 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
         min_index = m + n;
         int leaving = m + n;
         for (int i = 0; i < m; i++) {
-			if (node.A[i][entering] - 0 > ZERO_ERROR) {
+			if (node.A[i][entering] > ZERO) {
                 double tmp = node.b[i]/node.A[i][entering];
                 //printf("*** %d %lf\n", i, tmp);
                 if (max_delta > tmp) {
@@ -69,13 +54,13 @@ LPresult Simplex(double **input_A, double *input_b, double *input_C, int m, int 
                     max_delta = tmp;
                     min_index = node.B[i];
                 }
-				/*if (fabs(max_delta - tmp)< ZERO_ERROR) {
+				if (fabs(max_delta - tmp)< ZERO_ERROR) {
                     if(min_index > node.B[i]) {
                         leaving = i;
                         max_delta = tmp;
                         min_index = node.B[i];
                     }
-                }*/
+                }
             }
         }
         //printf("choosing leaving: %d %d\n", leaving, min_index);
@@ -142,7 +127,7 @@ void Pivot(Simplex_Node &node, int leaving, int entering)
 }
 
 
-bool Initial_Simplex(Simplex_Node &node, int &num)
+bool Initial_Simplex(Simplex_Node &node)
 {
     //puts("Run Initial_Simplex...");
     int k = -1;
@@ -184,27 +169,24 @@ bool Initial_Simplex(Simplex_Node &node, int &num)
     //PrintSimplexNode(node);
     //L_aux find the optimal solution of L_aux
     int flag = 0;
-	num = 0;
+	int num = 0;
     while(1){
         //choose the variable with the smallest index
 		num++;
-		/*if (num == 100000) {
+		if (num == 10000) {
 			delete []back_c;
 			return false;
-		}*/
+		}
 		//printf("Initial pivoting... %lf\n", node.v);
         //PrintSimplexNode(node);
         int min_index = n + m; //non basic variable starting form m
         int entering = n + m;
         for (int j = 0; j < n; j++) {
-            if((node.C[j]-0)> ZERO) {
-                //puts("can not stop");
+            if(node.C[j] > ZERO) {
                 if (min_index > node.N[j]) {
-                    //cout << "asdf" << endl;
                     min_index = node.N[j];
                     entering = j;
                 }
-					//break;
             }
         }
         //printf("choosing entering: %d %d\n", entering, min_index);
@@ -219,7 +201,7 @@ bool Initial_Simplex(Simplex_Node &node, int &num)
         min_index = m + n;
         int leaving = m + n;
         for (int i = 0; i < m; i++) {
-            if (node.A[i][entering]-0 > ZERO) {
+            if (node.A[i][entering] > ZERO) {
                 double tmp = node.b[i]/node.A[i][entering];
                 //printf("*** %d %lf\n", i, tmp);
                 if (max_delta > tmp) {

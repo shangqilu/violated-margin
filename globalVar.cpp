@@ -35,10 +35,15 @@ double Rho = 0.1;
 */
 double Delta = 0.5;
 
-
 /*
 *  The chosen method.
 */
 int Method = 0;
-
-
+/*
+*  The chosen radius of dataset.
+*/
+double Radius = 1;
+/*
+*  The chosen margin of dataset.
+*/
+double Margin = 0.1;

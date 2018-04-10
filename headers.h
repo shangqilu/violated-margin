@@ -32,7 +32,15 @@ using namespace std;
 
 const double MAX_DOUBLE = 1e300;
 const double ZERO = 0;
-const double ZERO_ERROR = 1e-100;
+
+/*
+*   sometimes there can a trouble in simplex algorithm
+*	if ZERO_ERROR is very small, may be there would be no solution
+*	if ZERO_ERROR is very large, may be there would be a cycling
+*	
+*
+*/
+const double ZERO_ERROR = 1e-15;
 
 /*
 *   the structure of a hyperplane
