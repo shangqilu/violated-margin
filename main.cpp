@@ -298,12 +298,25 @@ int main(int argc, char **argv)
 		}
 
 	}
-	if (n <= 0 || d <= 0 || p < 0)
-	{
-		flag = false;
-		printf("=========================================\n");
-		printf("You should indicate -n, -d, -p, -f at least.\n");
+
+	if (method < 3) {
+		if (n <= 0 || d <= 0 || p < 0)
+		{
+			flag = false;
+			printf("=========================================\n");
+			printf("You should indicate legal -n, -d, -p, -f at least.\n");
+		}
 	}
+	else {
+		if (n <= 0) {
+			flag = false;
+			printf("=========================================\n");
+			printf("You should indicate legal -n at least.\n");
+		}
+	}
+
+
+
 	if (y >= R)
 	{
 		flag = false;
@@ -312,7 +325,7 @@ int main(int argc, char **argv)
 	}
 	if (!flag) {
 		printf("=========================================\n");
-		printf("There is something wrong in your input.\n");
+		printf("Please check your input.\n");
 		printf("=========================================\n");
 		Usage();
 		exit(1);

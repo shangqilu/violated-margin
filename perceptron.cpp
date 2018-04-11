@@ -63,7 +63,7 @@ bool BallMarginPerceptron(PointList &pointlist, HyperPlane &plane, double y_gues
 	double y_min = R / (2 * (Dim + 1));
 	//1/dimension is a large margin
 	//we assume data has a large margin
-	long long maxIters = (int)((R*R) / (y_min*y_min*y_guess) + 0.5);
+	long long maxIters = (int)((R*R) / (y_min*y_min*y_guess*y_guess) + 0.5);
 	int iter_cnt = 0;	
 	//maxIters *= 100; //its a parameter
 	if (maxIters > MaxIterations) {

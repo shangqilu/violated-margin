@@ -38,12 +38,21 @@ void GenRandomPoint(double rangeStart, double rangeEnd, Point &p)
 	}
 }
 
+
+//from paper: On decompositional algorithms for uniform sampling from n-spheres and n-balls
 void GenRandomPointInCircle(Point &center, double radius, Point &p)
 {
+
+	double r = radius * pow((double)GenUniformRandom(0.0, 1.0), 1.0/(double)Dim);
+	double sum = 0;
 	for (int i = 0; i < Dim; i++){
-		double v = GenUniformRandom(-radius, radius);
-		p.x[i] = center.x[i] + v;
+		double v = GenGaussianRandom();
+		sum += v*v;
+		p.x[i] = v;
 	}
+	for (int i = 0; i < Dim; i++){
+		p.x[i]  = p.x[i] * r / sqrt(sum) + center.x[i];
+	}	
 }
 
 void GenRandomHyperPlane(double rangeStart, double rangeEnd, HyperPlane &plane)
