@@ -152,7 +152,7 @@ void GenMarginDataSet(char *filename, double margin, double radius,
 	int len = strlen(filename);
 	char *planefile = new char[len+10];
 	strcpy(planefile, filename);
-	strcpy(planefile + len, ".discribe");
+	strcpy(planefile + len, ".describe");
 	planefile[len + 9] = '\0';
 	FILE *f_plane = fopen(planefile, "w");
 	if (f_plane == NULL) {

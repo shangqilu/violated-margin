@@ -299,7 +299,7 @@ int main(int argc, char **argv)
 
 	}
 
-	if (method < 3) {
+	if (method <= 3) {
 		if (n <= 0 || d <= 0 || p < 0)
 		{
 			flag = false;
